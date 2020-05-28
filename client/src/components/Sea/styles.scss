@@ -1,0 +1,9 @@
+@import '../../assets/styles/variables.scss';
+
+.sea {
+    background-image: url('../../assets/images/sea.jpg');
+    background-size: auto 100%;
+    background-position: center;
+    width: $gameplay-area-width;
+    height: $gameplay-area-height;
+}

@@ -1,0 +1,124 @@
+@import '../../assets/styles/variables.scss';
+
+$fleet-width: $gameplay-area-width / 10;
+$fleet-height: $gameplay-area-height / 10;
+$fleet-border-width: 4px;
+
+.fleet {
+    position: absolute;
+    display: flex;
+    box-sizing: border-box;
+
+    &--horizontal {
+        height: $fleet-height;
+
+        .fleet__item {
+            transform: rotate(270deg);
+
+            &--fired::after {
+                transform: rotate(90deg);
+            }
+        }
+    }
+
+    &--vertical {
+        width: $fleet-width;
+        flex-direction: column;
+    }
+
+    &--movable {
+        border: 1px dotted black;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    &--error {
+        border: 1px dotted red;
+        background: rgba(255, 0, 0, 0.35);
+    }
+
+    &__item {
+        position: relative;
+        width: $fleet-width;
+        height: $fleet-height;
+
+        &--fired::after,
+        &--destroyed::after {
+            display: block;
+            content: ' ';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+        }
+
+        &::before {
+            width: $fleet-width - 16px;
+            margin: 0 auto;
+            height: 100%;
+            display: block;
+            content:  ' ';
+            box-sizing: border-box;
+            border: $fleet-border-width solid #51280B;
+            background: repeating-linear-gradient(
+                to right,
+                #9F561D,
+                #9F561D 8px,
+                #51280B 8px,
+                #51280B 16px
+            );
+        }
+
+        &--fired::after {
+            background-image: url('../../assets/images/fire.png'), url('../../assets/images/fire.png');
+        }
+
+        &--fired {
+            &::before {
+                border: $fleet-border-width solid rgb(46, 23, 6);
+                background: repeating-linear-gradient(
+                    to right,
+                    rgb(117, 77, 46),
+                    rgb(117, 77, 46),
+                    rgb(46, 23, 6) 8px,
+                    rgb(46, 23, 6) 16px
+                );
+            }
+        }
+
+        &--destroyed {
+            &::before {
+                border: $fleet-border-width solid #222;
+                background: repeating-linear-gradient(
+                    to right,
+                    #3F3F3F,
+                    #3F3F3F 8px,
+                    #222 8px,
+                    #222 16px
+                );
+            }
+
+            &::after {
+                background-image: url('../../assets/images/smoke.png'), url('../../assets/images/fire.png');
+            }
+        }
+
+        &:last-child {
+            &::before {
+                height: $fleet-height - 10px;
+                border-bottom-left-radius: 50% 100%;
+                border-bottom-right-radius: 50% 100%;
+            }
+        }
+        
+        &:first-child {
+            &::before {
+                height: $fleet-height - 10px;
+                margin-top: 10px;
+                border-top-left-radius: 8px 20px;
+                border-top-right-radius: 8px 20px;
+            }
+        }
+    }
+}

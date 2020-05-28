@@ -1,0 +1,11 @@
+@import '../../assets/styles/variables.scss';
+
+.layout {
+    width: $app-width;
+    height: $app-height;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
