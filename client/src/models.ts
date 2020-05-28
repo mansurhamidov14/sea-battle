@@ -3,6 +3,11 @@ export interface ICoordinates {
     V: number;
 }
 
+export interface IFiredCoordinates extends ICoordinates {
+    isSuccessful?: boolean;
+    wasDestroyed?: boolean;
+}
+
 export interface IFleetCoordinates extends ICoordinates {
     wasFired: boolean;
 }

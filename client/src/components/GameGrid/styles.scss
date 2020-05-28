@@ -1,6 +1,8 @@
 @import '../../assets/styles/variables.scss';
 
-$cell-border: 1px solid white;
+$cell-border-white: 1px solid white;
+$cell-border-black: 1px solid black;
+$fleet-border-width: 4px;
 
 .grid {
     width: 100%;
@@ -11,9 +13,9 @@ $cell-border: 1px solid white;
     &__row {
         display: flex;
         flex-wrap: wrap;
-        width: 100%;
+        width: $gameplay-area-width;
         height: $gameplay-area-height / 10;
-        border-bottom: $cell-border;
+        border-bottom: $cell-border-white;
         box-sizing: border-box;
 
         &:last-child {
@@ -21,7 +23,7 @@ $cell-border: 1px solid white;
         }
 
         &__cell {
-            border-right: $cell-border;
+            border-right: $cell-border-white;
             width: 10%;
             height: 100%;
             box-sizing: border-box;
@@ -39,6 +41,62 @@ $cell-border: 1px solid white;
                 background: url('../../assets/images/fire.png'), url('../../assets/images/smoke.png');
                 background-size: contain;
                 opacity: 0.7;
+            }
+
+            &--successfully-fired,
+            &--destroyed {
+                &::before,
+                &::after {
+                    background-size: contain;
+                    width: 100%;
+                    margin: 0 auto;
+                    height: 100%;
+                    display: block;
+                    content:  ' ';
+                    box-sizing: border-box;
+                }
+
+                &::after {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+            }
+
+            &--successfully-fired {
+                &::before {
+                    border: $fleet-border-width solid rgb(46, 23, 6);
+                    background: rgb(117, 77, 46);
+                }
+
+                &::after {
+                    background-image: url('../../assets/images/fire.png'), url('../../assets/images/fire.png');
+                }
+            }
+
+            &--destroyed {
+                &::before {
+                    border: $fleet-border-width solid #222;
+                    background: #3F3F3F;
+                }
+
+                &::after {
+                    background-image: url('../../assets/images/smoke.png'), url('../../assets/images/fire.png');
+                }
+            }
+        }
+    }
+
+    &--black-bordered {
+        .grid__row {
+            border-bottom: $cell-border-black;
+
+            &__cell {
+                border-right: $cell-border-black;
+
+                &:first-child {
+                    border-left: $cell-border-black;
+                }
             }
         }
     }
