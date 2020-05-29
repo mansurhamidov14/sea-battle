@@ -20,3 +20,30 @@ export enum EUserStatus {
     FLEET_LOCATING_IN_PROGRESS = 'FLEET_LOCATING_IN_PROGRESS',
     PLAYING = 'PLAYING',
 }
+
+export enum EKeyboardKeyCodes {
+    SPACE = 32,
+    LEFT = 37,
+    UP = 38,
+    RIGHT = 39,
+    DOWN = 40,
+    ROTATION = 82,
+    UNDO = 85
+}
+
+export enum EMovingDirection {
+    LEFT = 'LEFT',
+    UP = 'UP',
+    RIGHT = 'RIGHT',
+    DOWN = 'DOWN'
+}
+
+export enum EGameEvents {
+    LOCATE_FLEET = 'LOCATE_FLEET',
+    MOVE_FLEET_LEFT = 'MOVE_FLEET_LEFT',
+    MOVE_FLEET_UP = 'MOVE_FLEET_UP',
+    MOVE_FLEET_RIGHT = 'MOVE_FLEET_RIGHT',
+    MOVE_FLEET_DOWN = 'MOVE_FLEET_DOWN',
+    ROTATE_FLEET = 'ROTATE_FLEET',
+    UNDO = 'UNDO',
+}

@@ -4,7 +4,7 @@ export interface ICoordinates {
 }
 
 export interface IFleetCoordinates extends ICoordinates {
-    wasFired: boolean;
+    wasFired?: boolean;
 }
 
 export interface IOpponentFleet {
@@ -16,4 +16,8 @@ export interface IOpponentFleet {
 export interface IFleet {
     id: number;
     coordinates: IFleetCoordinates[];
+}
+
+export interface IMovableFleet extends IFleet {
+    hasError?: boolean;
 }
