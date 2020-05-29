@@ -76,7 +76,7 @@ io.on('connection', socket => {
             const opponent = users.getOpponent(socket.id, roomId);
             if (opponent) {
                 const fireResult = fleets.fire(coordinates, opponent.id);
-                callback(fireResult.wasFired, fireResult.wasDestroyed);
+                callback(fireResult.firedFleetId, fireResult.wasFired, fireResult.wasDestroyed);
                 io.emit(opponent.id, fireResult);
             }
         }

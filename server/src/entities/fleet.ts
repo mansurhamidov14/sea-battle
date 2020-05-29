@@ -8,6 +8,7 @@ interface IFleetCoordinates extends ICoordinates {
 }
 
 interface IUserFleet {
+    id: number;
     fleet: IFleetCoordinates[];
     wasDestroyed: boolean;
 }
@@ -18,6 +19,7 @@ interface IUsersFleets {
 }
 
 interface IFireResult {
+    firedFleetId: number | null;
     fleets: IUserFleet[];
     isGameOver: boolean;
     wasDestroyed: boolean;
@@ -35,11 +37,12 @@ class Fleets implements IFleets {
 
     public fire (coordinates: ICoordinates, userId: string): IFireResult {
         const userFleets = this.list.find(fleets => fleets.userId === userId)?.fleets;
+        let firedFleetId: number | null = null;
         let isSuccessful = false;
         let wasDestroyed = false;
         
         if (userFleets) {
-            this.list.map(
+            this.list = this.list.map(
                 item => {
                     if (item.userId === userId) {
                         return {
@@ -49,6 +52,7 @@ class Fleets implements IFleets {
                                     const updatedFleet: IFleetCoordinates[] = fleetItem.fleet.map(
                                         ({ H, V, wasFired }) => {
                                             if (coordinates.H === H && coordinates.V === V && !wasFired) {
+                                                firedFleetId = fleetItem.id;
                                                 isSuccessful = true;
                                                 return { H, V, wasFired: true };
                                             }
@@ -57,6 +61,7 @@ class Fleets implements IFleets {
                                     );
                                     wasDestroyed = updatedFleet.every(({ wasFired }) => wasFired);
                                     return {
+                                        id: fleetItem.id,
                                         fleet: updatedFleet,
                                         wasDestroyed
                                     };
@@ -72,6 +77,7 @@ class Fleets implements IFleets {
         return {
             isGameOver: this.list.every(fleets => fleets.fleets.every(fleet => fleet.wasDestroyed)),
             fleets: this.list.find(fleets => fleets.userId === userId)?.fleets as IUserFleet[],
+            firedFleetId,
             wasDestroyed,
             wasFired: isSuccessful,
         };
@@ -80,7 +86,10 @@ class Fleets implements IFleets {
     public setUserFleets (userId: string, fleets: IUserFleet[]): void {
         this.list = [
             ...this.list.filter(item => item.userId !== userId),
-            { userId, fleets }
+            {
+                userId,
+                fleets: fleets.map((fleet, index) => ({ ...fleet, id: index + 1 }))
+            }
         ];
     }
 }
