@@ -35,7 +35,7 @@ export const OpponentFleet: React.FC<IProps> = ({
                 }
                 return (
                     <div className={itemClassnames.join(' ')} key={i} />
-                )
+                );
             })}
         </div>
     )

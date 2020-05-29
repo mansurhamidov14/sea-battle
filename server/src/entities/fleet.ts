@@ -86,10 +86,7 @@ class Fleets implements IFleets {
     public setUserFleets (userId: string, fleets: IUserFleet[]): void {
         this.list = [
             ...this.list.filter(item => item.userId !== userId),
-            {
-                userId,
-                fleets: fleets.map((fleet, index) => ({ ...fleet, id: index + 1 }))
-            }
+            { userId, fleets }
         ];
     }
 }
