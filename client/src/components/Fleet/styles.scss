@@ -120,5 +120,9 @@ $fleet-border-width: 4px;
                 border-top-right-radius: 8px 20px;
             }
         }
+
+        &:only-child::before {
+            margin-top: 5px;
+        }
     }
 }

@@ -42,48 +42,6 @@ $fleet-border-width: 4px;
                 background-size: contain;
                 opacity: 0.7;
             }
-
-            &--successfully-fired,
-            &--destroyed {
-                &::before,
-                &::after {
-                    background-size: contain;
-                    width: 100%;
-                    margin: 0 auto;
-                    height: 100%;
-                    display: block;
-                    content:  ' ';
-                    box-sizing: border-box;
-                }
-
-                &::after {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                }
-            }
-
-            &--successfully-fired {
-                &::before {
-                    border: $fleet-border-width solid rgb(46, 23, 6);
-                    background: rgb(117, 77, 46);
-                }
-
-                &::after {
-                    background-image: url('../../assets/images/fire.png'), url('../../assets/images/fire.png');
-                }
-            }
-
-            &--destroyed {
-                &::before {
-                    border: $fleet-border-width solid #222;
-                    background: #3F3F3F;
-                }
-
-                &::after {
-                    background-image: url('../../assets/images/smoke.png'), url('../../assets/images/fire.png');
-                }
-            }
         }
     }
 

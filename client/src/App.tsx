@@ -4,6 +4,7 @@ import {
     Layout,
     Sea,
     Fleet,
+    OpponentFleet,
 } from './components';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
         <Layout>
             <Sea>
                 <GameGrid
+                    blackBordered
                     firedCoordinates={[
                         {H: 1, V: 8},
                         {H: 2, V: 6},
@@ -60,8 +62,17 @@ function App() {
                             {H: 9, V: 6, wasFired: false},
                         ]}
                     />
+                    <OpponentFleet
+                        wasDestroyed
+                        coordinates={[
+                            {H: 8, V: 2},
+                            {H: 8, V: 3},
+                            {H: 8, V: 4},
+                            {H: 8, V: 5},
+                            {H: 8, V: 6},
+                        ]}
+                    />
                 </GameGrid>
-                
             </Sea>
         </Layout>
     );
