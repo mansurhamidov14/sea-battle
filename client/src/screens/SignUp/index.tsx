@@ -36,9 +36,8 @@ export const SignUpScreen: React.FC<IProps> = ({
                 </div>
                 <div className="user__avatars-list">
                     {Object.keys(assets.avatars).map((avatarName) => (
-                        <div className="user__avatars-list__item">
+                        <div key={avatarName} className="user__avatars-list__item">
                             <Avatar
-                                key={avatarName}
                                 name={avatarName as any}
                                 selected={avatarName === avatar}
                                 size={96}

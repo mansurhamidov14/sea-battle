@@ -6,13 +6,14 @@ import { EUserStatus } from '../enums';
 export interface IUser {
     id: string;
     username: string;
+    avatar: string;
     status: EUserStatus;
     roomId?: string;
 }
 
 interface IUsers {
     list: IUser[];
-    create: (username: string, socketId: string) => IUser;
+    create: (user: IUser, socketId: string) => IUsers;
     exists: (username: string) => boolean;
     findById: (id: string) => IUser | undefined;
     setStatus: (id: string, status: EUserStatus) => void;
@@ -27,14 +28,14 @@ interface IUsers {
 class Users implements IUsers {
     public list: IUser[] = [];
 
-    public create (username: string, socketId: string): IUser {
-        const user = {
+    public create (user: IUser, socketId: string): IUsers {
+        const newUser = {
+            ...user,
             id: socketId,
-            username,
             status: EUserStatus.ONLINE
         }
-        this.list.push(user);
-        return user;
+        this.list.push(newUser);
+        return this;
     }
 
     public exists (username: string): boolean {
@@ -72,10 +73,10 @@ class Users implements IUsers {
     }
 
     public leaveRoom (id: string): void {
-        this.list = this.list.map(({ id: userId, username, roomId, status }) => (
+        this.list = this.list.map(({ avatar, id: userId, username, roomId, status }) => (
             id === userId 
-                ? { id, username, status: EUserStatus.ONLINE }
-                : { id, username, roomId, status }
+                ? { avatar, id, username, status: EUserStatus.ONLINE }
+                : { avatar, id, username, roomId, status }
         ));
     }
 

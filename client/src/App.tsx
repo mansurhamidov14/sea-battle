@@ -2,8 +2,16 @@ import * as React from 'react';
 import io from 'socket.io-client';
 
 import { Layout } from './components';
-import { EUserStatus, EAvatarName } from './enums';
-import { IOpponentFleet, IFleetCoordinates, IUser } from './models';
+import {
+    EAvatarName,
+    EEvents,
+    EUserStatus
+} from './enums';
+import {
+    IFleetCoordinates,
+    IOpponentFleet,
+    IUser
+} from './models';
 import { ControlService, IControlService } from './services/Controls';
 import { HomeScreen, FleetLocatingScreen } from './screens';
 import { SignUpScreen } from './screens/SignUp';
@@ -22,7 +30,7 @@ class App extends React.Component<{}, IAppState> {
     constructor (props: {}) {
         super(props);
         this.state = {
-            userStatus: EUserStatus.SIGN_UP,
+            userStatus: EUserStatus.UNREGISTERED,
             fleets: [],
             opponentFleets: [],
             user: {
@@ -31,7 +39,7 @@ class App extends React.Component<{}, IAppState> {
             }
         }
 
-        const socketUrl = 'http://192.168.1.108:8080';
+        const socketUrl = 'http://192.168.1.106:8080';
         this.socket = io(socketUrl);
         this.controlService = new ControlService();
     }
@@ -54,6 +62,14 @@ class App extends React.Component<{}, IAppState> {
         }));
     }
 
+    submitUser () {
+        this.socket.emit(
+            EEvents.CREATE_USER, 
+            this.state.user,
+            () => this.setState({ userStatus: EUserStatus.ONLINE })
+        )
+    }
+
     componentDidMount () {
         this.controlService.init();
     }
@@ -67,12 +83,12 @@ class App extends React.Component<{}, IAppState> {
                 {EUserStatus.FLEET_LOCATING_IN_PROGRESS === this.state.userStatus && (
                     <FleetLocatingScreen />
                 )}
-                {EUserStatus.SIGN_UP && (
+                {(EUserStatus.UNREGISTERED === this.state.userStatus) && (
                     <SignUpScreen
                         {...this.state.user}
                         onChangeUsername={this.setUsername.bind(this)}
                         onSelectAvatar={this.setAvatar.bind(this)}
-                        onStartGame={console.log}
+                        onStartGame={this.submitUser.bind(this)}
                     />
                 )}
             </Layout>

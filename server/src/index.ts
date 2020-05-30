@@ -13,12 +13,13 @@ const PORT = process.env.PORT || 8080;
 io.on('connection', socket => {
     console.log('New connection', socket.id);
 
-    socket.on(EEvents.CREATE_USER, (username, callback) => {
-        if (users.exists(username)) {
-            callback({ userExists: true })
-        } else {
-            users.create(username, socket.id);
-        }
+    socket.on(EEvents.CREATE_USER, (user, callback) => {
+        console.log(user);
+        users
+            .create(user, socket.id)
+            .setStatus(socket.id, EUserStatus.ONLINE);
+        
+        callback()
     });
 
     socket.on(EEvents.CREATE_ROOM, () => {

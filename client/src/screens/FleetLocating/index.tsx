@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Fleet, GameGrid, Sea } from '../../components';
-import { EGameEvents, EMovingDirection, EAvatarName } from '../../enums';
+import { EGameEvents, EAvatarName } from '../../enums';
 import { IFleet, IMovableFleet } from '../../models';
 import { FleetService, IFleetService } from '../../services/Fleet';
 import { Avatar } from '../../components/Avatar';
