@@ -18,15 +18,7 @@ export class FleetLocatingScreen extends React.Component<{}, IState> {
 
         this.state = {
             locatedFleets: [],
-            currentFleet: {
-                id: 1,
-                coordinates: [
-                    { H: 1, V: 1 },
-                    { H: 1, V: 2 },
-                    { H: 1, V: 3 },
-                    { H: 1, V: 4 }
-                ]
-            }
+            currentFleet: this.fleetService.generateFleet()
         };
     }
 
@@ -58,14 +50,9 @@ export class FleetLocatingScreen extends React.Component<{}, IState> {
         if (locatedFleets.length === prevState.locatedFleets.length) {
             return false;
         }
-        const nextFleetId: number = locatedFleets.length + 1;
-        const nextFleetSize: number =
-            !locatedFleets.length ? 4 :
-            locatedFleets.length < 3 ? 3 :
-            locatedFleets.length < 6 ? 2 :
-            locatedFleets.length < 10 ? 1 : 0
-        if (nextFleetSize) {
-            this.setCurrentFleetCoordinates(this.fleetService.generateFleet(nextFleetId, nextFleetSize))
+
+        if (locatedFleets.length < 10) {
+            this.setCurrentFleetCoordinates(this.fleetService.generateFleet(locatedFleets.length))
         } else {
             this.setState({ currentFleet: null as any });
         }

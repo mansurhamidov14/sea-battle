@@ -4,18 +4,29 @@ import { IFleet } from '../models';
 import { EMovingDirection } from '../enums';
 
 export interface IFleetService {
-    generateFleet: (id: number, size: number) => IFleet;
+    generateFleet: (locatedCount?: number) => IFleet;
     moveFleet: (fleet: IFleet, direction: EMovingDirection) => IFleet;
     rotateFleet: (fleet: IFleet) => IFleet;
 }
 
 export class FleetService implements IFleetService {
-    public generateFleet (id: number, size: number): IFleet {
+    public generateFleet (locatedCount: number = 0): IFleet {
+        const size = this.getNextFleetSize(locatedCount);
+        const id = locatedCount + 1;
         const coordinates: IFleet['coordinates'] = range(1, size + 1).map(verticalCoordinate => (
             { H: 1, V: verticalCoordinate }
         ));
 
         return { id, coordinates };
+    }
+
+    private getNextFleetSize (locatedCount: number) {
+        return (
+            !locatedCount ? 4 :
+            locatedCount < 3 ? 3 :
+            locatedCount < 6 ? 2 :
+            locatedCount < 10 ? 1 : 0
+        )
     }
 
     public moveFleet (fleet: IFleet, direction: EMovingDirection): IFleet {
