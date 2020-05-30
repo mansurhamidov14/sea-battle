@@ -1,0 +1,67 @@
+import { EAvatarName } from '../enums';
+
+interface IAssets {
+    avatars: Record<EAvatarName, any>,
+    [key: string]: any
+}
+
+export const assets: IAssets = {
+    avatars: {
+        'boy-1': require('./images/avatars/boy-1.png'),
+        'boy-2': require('./images/avatars/boy-2.png'),
+        'boy-3': require('./images/avatars/boy-3.png'),
+        'boy-4': require('./images/avatars/boy-4.png'),
+        'boy-5': require('./images/avatars/boy-6.png'),
+        'boy-6': require('./images/avatars/boy-6.png'),
+        'boy-7': require('./images/avatars/boy-7.png'),
+        'boy-8': require('./images/avatars/boy-8.png'),
+        'boy-9': require('./images/avatars/boy-9.png'),
+        'boy-10': require('./images/avatars/boy-10.png'),
+        'boy-11': require('./images/avatars/boy-11.png'),
+        'boy-12': require('./images/avatars/boy-12.png'),
+        'boy-13': require('./images/avatars/boy-13.png'),
+        'boy-14': require('./images/avatars/boy-14.png'),
+        'boy-15': require('./images/avatars/boy-15.png'),
+        'boy-16': require('./images/avatars/boy-16.png'),
+        'boy-17': require('./images/avatars/boy-17.png'),
+        'boy-18': require('./images/avatars/boy-18.png'),
+        'boy-19': require('./images/avatars/boy-19.png'),
+        'boy-20': require('./images/avatars/boy-20.png'),
+        'boy-21': require('./images/avatars/boy-21.png'),
+        'boy-22': require('./images/avatars/boy-22.png'),
+        'boy-23': require('./images/avatars/boy-23.png'),
+        'girl-1': require('./images/avatars/girl-1.png'),
+        'girl-2': require('./images/avatars/girl-2.png'),
+        'girl-3': require('./images/avatars/girl-3.png'),
+        'girl-4': require('./images/avatars/girl-4.png'),
+        'girl-5': require('./images/avatars/girl-6.png'),
+        'girl-6': require('./images/avatars/girl-6.png'),
+        'girl-7': require('./images/avatars/girl-7.png'),
+        'girl-8': require('./images/avatars/girl-8.png'),
+        'girl-9': require('./images/avatars/girl-9.png'),
+        'girl-10': require('./images/avatars/girl-10.png'),
+        'girl-11': require('./images/avatars/girl-11.png'),
+        'girl-12': require('./images/avatars/girl-12.png'),
+        'girl-13': require('./images/avatars/girl-13.png'),
+        'girl-14': require('./images/avatars/girl-14.png'),
+        'girl-15': require('./images/avatars/girl-15.png'),
+        'girl-16': require('./images/avatars/girl-16.png'),
+        'girl-17': require('./images/avatars/girl-17.png'),
+        'girl-18': require('./images/avatars/girl-18.png'),
+        'girl-19': require('./images/avatars/girl-19.png'),
+        'girl-20': require('./images/avatars/girl-20.png'),
+        'girl-21': require('./images/avatars/girl-21.png'),
+        'girl-22': require('./images/avatars/girl-22.png'),
+        'girl-23': require('./images/avatars/girl-23.png'),
+        'girl-24': require('./images/avatars/girl-24.png'),
+        'girl-25': require('./images/avatars/girl-25.png'),
+        'girl-26': require('./images/avatars/girl-26.png'),
+        'girl-27': require('./images/avatars/girl-27.png'),
+    },
+    images: {
+        fire: require('./images/fire.png'),
+        play: require('./images/play.png'),
+        sea: require('./images/sea.jpg'),
+        smoke: require('./images/smoke.png')
+    }
+}

@@ -1,0 +1,26 @@
+.avatar {
+    border-radius: 50%;
+    border: 6px solid #D3D3D3;
+    background: white;
+    box-sizing: border-box;
+    padding-top: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+
+    &--selected {
+        border-color: green;
+    }
+
+    &--hover {
+        cursor: pointer;
+
+        &:hover {
+            border-color: green;
+        }
+    }
+
+    img {
+        width: 100%;
+        border-radius: 50%;
+    }
+}

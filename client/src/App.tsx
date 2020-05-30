@@ -2,15 +2,17 @@ import * as React from 'react';
 import io from 'socket.io-client';
 
 import { Layout } from './components';
-import { EUserStatus } from './enums';
-import { IOpponentFleet, IFleetCoordinates } from './models';
+import { EUserStatus, EAvatarName } from './enums';
+import { IOpponentFleet, IFleetCoordinates, IUser } from './models';
 import { ControlService, IControlService } from './services/Controls';
 import { HomeScreen, FleetLocatingScreen } from './screens';
+import { SignUpScreen } from './screens/SignUp';
 
 interface IAppState {
     userStatus: EUserStatus,
     fleets: IFleetCoordinates[]
     opponentFleets: IOpponentFleet[];
+    user: IUser;
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -20,14 +22,36 @@ class App extends React.Component<{}, IAppState> {
     constructor (props: {}) {
         super(props);
         this.state = {
-            userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS,
+            userStatus: EUserStatus.SIGN_UP,
             fleets: [],
-            opponentFleets: []
+            opponentFleets: [],
+            user: {
+                avatar: EAvatarName.BOY_1,
+                username: '',
+            }
         }
 
         const socketUrl = 'http://192.168.1.108:8080';
         this.socket = io(socketUrl);
         this.controlService = new ControlService();
+    }
+
+    setUsername (username: string) {
+        this.setState(state => ({
+            user: {
+                ...state.user,
+                username
+            }
+        }));
+    }
+
+    setAvatar (avatar: EAvatarName) {
+        this.setState(state => ({
+            user: {
+                ...state.user,
+                avatar
+            }
+        }));
     }
 
     componentDidMount () {
@@ -42,6 +66,14 @@ class App extends React.Component<{}, IAppState> {
                 )}
                 {EUserStatus.FLEET_LOCATING_IN_PROGRESS === this.state.userStatus && (
                     <FleetLocatingScreen />
+                )}
+                {EUserStatus.SIGN_UP && (
+                    <SignUpScreen
+                        {...this.state.user}
+                        onChangeUsername={this.setUsername.bind(this)}
+                        onSelectAvatar={this.setAvatar.bind(this)}
+                        onStartGame={console.log}
+                    />
                 )}
             </Layout>
         );

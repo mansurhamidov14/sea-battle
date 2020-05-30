@@ -1,3 +1,5 @@
+export { Avatar } from './Avatar';
+export { Button } from './Button';
 export { Fleet } from './Fleet';
 export { GameGrid } from './GameGrid';
 export { Layout } from './Layout';

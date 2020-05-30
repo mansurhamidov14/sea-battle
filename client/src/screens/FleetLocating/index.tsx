@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { Fleet, GameGrid, Sea } from '../../components';
-import { EGameEvents, EMovingDirection } from '../../enums';
+import { EGameEvents, EMovingDirection, EAvatarName } from '../../enums';
 import { IFleet, IMovableFleet } from '../../models';
 import { FleetService, IFleetService } from '../../services/Fleet';
+import { Avatar } from '../../components/Avatar';
 
 interface IState {
     locatedFleets: IFleet[];
@@ -82,6 +83,7 @@ export class FleetLocatingScreen extends React.Component<{}, IState> {
     render () {
         return (
             <Sea>
+                <Avatar name={EAvatarName.BOY_1} />
                 <GameGrid>
                     {this.state.locatedFleets.map(fleet => (
                         <Fleet key={fleet.id} coordinates={fleet.coordinates} />

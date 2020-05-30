@@ -1,3 +1,5 @@
+import { EAvatarName } from "./enums";
+
 export interface ICoordinates {
     H: number;
     V: number;
@@ -20,4 +22,9 @@ export interface IFleet {
 
 export interface IMovableFleet extends IFleet {
     hasError?: boolean;
+}
+
+export interface IUser {
+    avatar: EAvatarName;
+    username: string;
 }

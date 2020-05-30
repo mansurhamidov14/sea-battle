@@ -20,13 +20,13 @@ export class FleetService implements IFleetService {
         return { id, coordinates };
     }
 
-    private getNextFleetSize (locatedCount: number) {
+    private getNextFleetSize (locatedCount: number): number {
         return (
             !locatedCount ? 4 :
             locatedCount < 3 ? 3 :
             locatedCount < 6 ? 2 :
             locatedCount < 10 ? 1 : 0
-        )
+        );
     }
 
     public moveFleet (fleet: IFleet, direction: EMovingDirection): IFleet {
