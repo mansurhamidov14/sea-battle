@@ -1,7 +1,8 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 
-import { Layout, Alert } from './components';
+import { Alert, Layout } from './components';
+import { IAlertProps } from './components/Alert';
 import {
     EAvatarName,
     EEvents,
@@ -12,9 +13,9 @@ import {
 import {
     IAwaitingUser,
     IFleetCoordinates,
+    INotification,
     IOpponentFleet,
     IUser,
-    INotification,
 } from './models';
 import { ControlService, IControlService } from './services/Controls';
 import { FleetLocatingScreen, WaitingRoomScreen } from './screens';
@@ -81,7 +82,7 @@ class App extends React.Component<{}, IAppState> {
         )
     }
 
-    getNotificationData (notification: INotification) {
+    getNotificationData (notification: INotification): IAlertProps {
         const { DECLINED_INVITATION, RECEIVED_INVITATION } = ENotificationType;
         const { username, type } = notification
         return {
@@ -95,6 +96,7 @@ class App extends React.Component<{}, IAppState> {
                     onClick: () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
                 }
             ] : undefined,
+            avatarName: notification.avatar,
             message: type === DECLINED_INVITATION
                 ? `${username} has declined your invitation` : `${username} wants to play with you`,
             title: type === DECLINED_INVITATION ? 'Your invitation has been declined' : 'You have got new invitation',

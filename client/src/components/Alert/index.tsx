@@ -10,7 +10,7 @@ interface IAction {
     onClick: () => void;
 }
 
-export interface IProps {
+export interface IAlertProps {
     actions?: IAction[];
     avatarName?: EAvatarName;
     message?: string;
@@ -19,7 +19,7 @@ export interface IProps {
     view: EViewType;
 }
 
-export const Alert: React.FC<IProps> = ({
+export const Alert: React.FC<IAlertProps> = ({
     actions,
     avatarName,
     message,
