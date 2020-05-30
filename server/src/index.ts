@@ -38,14 +38,13 @@ io.on('connection', socket => {
     });
 
     socket.on(EEvents.ACCEPT_JOIN_REQUEST, (userId: string) => {
-        const roomId = users.findById(socket.id)?.roomId;
         const user = users.findById(userId);
 
-        if (user && roomId) {
-            socket.join(roomId);
-            users.joinToRoom(userId, roomId, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
+        if (user && user.roomId) {
+            socket.join(user.roomId);
+            users.joinToRoom(socket.id, user.roomId, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
             users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
-            io.to(roomId).emit(EEvents.START_FLEETS_LOCATING);
+            io.to(user.roomId).emit(EEvents.START_FLEETS_LOCATING);
         } else {
             io.to(socket.id).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         }

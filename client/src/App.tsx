@@ -88,12 +88,12 @@ class App extends React.Component<{}, IAppState> {
         return {
             actions: type === RECEIVED_INVITATION ? [
                 {
-                    label: 'Accept',
-                    onClick: () => this.reactToInvitation(notification.id as string, EEvents.ACCEPT_JOIN_REQUEST)
-                },
-                {
                     label: 'Decline',
                     onClick: () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
+                },
+                {
+                    label: 'Accept',
+                    onClick: () => this.reactToInvitation(notification.id as string, EEvents.ACCEPT_JOIN_REQUEST)
                 }
             ] : undefined,
             avatarName: notification.avatar,
@@ -157,6 +157,9 @@ class App extends React.Component<{}, IAppState> {
                 ]
             }));
         });
+        this.socket.on(EEvents.START_FLEETS_LOCATING, () => {
+            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS});
+        })
     }
 
     render () {
