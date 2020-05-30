@@ -40,7 +40,7 @@ export const GameGrid: React.FC<IProps> = ({
                             <div
                                 key={`${row}${col}`}
                                 className={gridCellClassName}
-                                onClick={onClickItem && !wasFired ? (() => onClickItem(row, col)) : undefined}
+                                onClick={onClickItem && !wasFired ? (() => onClickItem(col, row)) : undefined}
                             />
                         )
                     })}

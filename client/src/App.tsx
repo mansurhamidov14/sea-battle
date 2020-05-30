@@ -8,27 +8,28 @@ import {
     EEvents,
     EUserStatus,
     ENotificationType,
-    EViewType
+    EPlayingMode,
+    EViewType,
 } from './enums';
 import {
     IAwaitingUser,
     IFleet,
-    IFleetCoordinates,
     INotification,
     IOpponentFleet,
     IUser,
 } from './models';
 import { ControlService, IControlService } from './services/Controls';
-import { FleetLocatingScreen, WaitingRoomScreen } from './screens';
+import { FleetLocatingScreen, WaitingRoomScreen, GameScreen } from './screens';
 import { SignUpScreen } from './screens/SignUp';
 
 interface IAppState {
     awaitingUsers: IAwaitingUser[];
-    fleets: IFleetCoordinates[];
+    fleets: IFleet[];
     notifications: INotification[];
     opponentFleets: IOpponentFleet[];
     user: IUser;
-    userStatus: EUserStatus,
+    userStatus: EUserStatus;
+    playingMode?: EPlayingMode;
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -128,12 +129,46 @@ class App extends React.Component<{}, IAppState> {
                 ...user,
                 hasBeenInvited: user.roomId === roomId || user.hasBeenInvited
             }))
-        }))
+        }));
     }
 
     submitFleetLocating (fleets: IFleet[]) {
         this.socket.emit(EEvents.COMPLETE_FLEETS_LOCATING, fleets, () => {
-            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_COMPLETED });
+            this.setState({
+                fleets,
+                userStatus: EUserStatus.FLEET_LOCATING_COMPLETED,
+            });
+        });
+    }
+
+    fireOpponent (V: number, H: number) {
+        this.socket.emit(EEvents.FIRE, { V, H }, (firedFleetId: number | null, wasDestroyed: boolean) => {
+            if (firedFleetId) {
+                if (this.state.opponentFleets.some(fleet => fleet.id === firedFleetId)) {
+                    this.setState(state => ({
+                        opponentFleets: state.opponentFleets.map(
+                            fleet => {
+                                if (fleet.id === firedFleetId) {
+                                    return {
+                                        ...fleet,
+                                        wasDestroyed,
+                                        coordinates: [...fleet.coordinates, { V, H }]
+                                    };
+                                }
+                                return fleet;
+                            }
+                        )
+                    }))
+                } else {
+                    this.setState(state => ({
+                        opponentFleets: [...state.opponentFleets, {
+                            id: firedFleetId,
+                            wasDestroyed,
+                            coordinates: [{ H, V}]
+                        }]
+                    }));
+                }
+            }
         });
     }
 
@@ -166,7 +201,13 @@ class App extends React.Component<{}, IAppState> {
         });
         this.socket.on(EEvents.START_FLEETS_LOCATING, () => {
             this.setState({ userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS });
-        })
+        });
+        this.socket.on(EEvents.START_GAME, (firstFireUserId: string) => {
+            this.setState(state => ({
+                playingMode: Number(firstFireUserId === state.user.id),
+                userStatus: EUserStatus.PLAYING
+            }));
+        });
     }
 
     render () {
@@ -193,6 +234,14 @@ class App extends React.Component<{}, IAppState> {
                         onChangeUsername={this.setUsername.bind(this)}
                         onSelectAvatar={this.setAvatar.bind(this)}
                         onStartGame={this.submitUser.bind(this)}
+                    />
+                )}
+                {EUserStatus.PLAYING === this.state.userStatus && (
+                    <GameScreen
+                        playingMode={this.state.playingMode as any}
+                        userFleets={this.state.fleets}
+                        opponentFleets={this.state.opponentFleets}
+                        onFire={this.fireOpponent.bind(this)}
                     />
                 )}
                 {Boolean(this.state.notifications.length) && this.state.notifications.map((notification, index) => (

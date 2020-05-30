@@ -65,7 +65,7 @@ io.on('connection', socket => {
                 callback();
             } else {
                 users.startBattle(roomId);
-                io.to(roomId).emit(EEvents.START_GAME);
+                io.to(roomId).emit(EEvents.START_GAME, opponent.id);
             }
         }
     });
@@ -76,7 +76,7 @@ io.on('connection', socket => {
             const opponent = users.getOpponent(socket.id, roomId);
             if (opponent) {
                 const fireResult = fleets.fire(coordinates, opponent.id);
-                callback(fireResult.firedFleetId, fireResult.wasFired, fireResult.wasDestroyed);
+                callback(fireResult.firedFleetId, fireResult.wasDestroyed);
                 io.emit(opponent.id, fireResult);
             }
         }

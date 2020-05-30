@@ -67,6 +67,11 @@ export enum ENotificationType {
     RECEIVED_INVITATION = 'RECEIVED_INVITATION',
 }
 
+export enum EPlayingMode {
+    WATCHING,
+    FIRING
+}
+
 export enum EAvatarName {
     BOY_1 = 'boy-1',
     BOY_2 = 'boy-2',
