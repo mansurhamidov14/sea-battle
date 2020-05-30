@@ -12,6 +12,7 @@ import {
 } from './enums';
 import {
     IAwaitingUser,
+    IFleet,
     IFleetCoordinates,
     INotification,
     IOpponentFleet,
@@ -130,6 +131,12 @@ class App extends React.Component<{}, IAppState> {
         }))
     }
 
+    submitFleetLocating (fleets: IFleet[]) {
+        this.socket.emit(EEvents.COMPLETE_FLEETS_LOCATING, fleets, () => {
+            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_COMPLETED });
+        });
+    }
+
     componentDidMount () {
         this.controlService.init();
         this.socket.on(EEvents.GET_AWAITING_USERS_LIST, (users: IAwaitingUser[]) => {
@@ -158,7 +165,7 @@ class App extends React.Component<{}, IAppState> {
             }));
         });
         this.socket.on(EEvents.START_FLEETS_LOCATING, () => {
-            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS});
+            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS });
         })
     }
 
@@ -171,8 +178,14 @@ class App extends React.Component<{}, IAppState> {
                         onPlay={this.invitePlayer.bind(this)}
                     />
                 )}
-                {EUserStatus.FLEET_LOCATING_IN_PROGRESS === this.state.userStatus && (
-                    <FleetLocatingScreen />
+                {(
+                    EUserStatus.FLEET_LOCATING_IN_PROGRESS === this.state.userStatus ||
+                    EUserStatus.FLEET_LOCATING_COMPLETED === this.state.userStatus
+                ) && (
+                    <FleetLocatingScreen
+                        onSubmit={this.submitFleetLocating.bind(this)}
+                        submitted={this.state.userStatus === EUserStatus.FLEET_LOCATING_COMPLETED}
+                    />
                 )}
                 {(EUserStatus.UNREGISTERED === this.state.userStatus) && (
                     <SignUpScreen

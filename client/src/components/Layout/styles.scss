@@ -1,7 +1,8 @@
 @import '../../assets/styles/variables.scss';
 
 .layout {
-    width: $app-width;
+    max-width: $app-width;
+    width: 100%;
     height: $app-height;
     display: flex;
     flex-wrap: wrap;
