@@ -14,27 +14,22 @@ io.on('connection', socket => {
     console.log('New connection', socket.id);
 
     socket.on(EEvents.CREATE_USER, (user, callback) => {
-        console.log(user);
+        const roomId = uuid();
+    
         users
             .create(user, socket.id)
-            .setStatus(socket.id, EUserStatus.ONLINE);
-        
-        callback()
-    });
-
-    socket.on(EEvents.CREATE_ROOM, () => {
-        const roomId = uuid();
+            .joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
         socket.join(roomId);
-        users.joinToRoom(socket.id, roomId);
-        io.to(socket.id).emit(EEvents.CREATE_ROOM, roomId);
+
+        callback(socket.id);
+        io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
     });
 
-    socket.on(EEvents.SEND_JOIN_REQUEST, (roomId, callback) => {
+    socket.on(EEvents.SEND_JOIN_REQUEST, (roomId) => {
         const roomHost = users.getByRoom(roomId);
         const user = users.findById(socket.id);
         if (roomHost) {
             io.to(roomHost.id).emit(EEvents.SEND_JOIN_REQUEST, user);
-            callback(roomId);
         } else {
             socket.join(roomId);
             users.joinToRoom(socket.id, roomId);
@@ -54,6 +49,11 @@ io.on('connection', socket => {
         } else {
             io.to(socket.id).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         }
+    });
+
+    socket.on(EEvents.DECLINE_JOIN_REQUEST, (userId: string) => {
+        const user = users.findById(socket.id);
+        io.to(userId).emit(EEvents.DECLINE_JOIN_REQUEST, user);
     });
 
     socket.on(EEvents.COMPLETE_FLEETS_LOCATING, (userFleets, callback) => {

@@ -2,3 +2,28 @@ $app-width: 900px;
 $app-height: 640px;
 $gameplay-area-width: 640px;
 $gameplay-area-height: 640px;
+
+$primary: #2E7FF7;
+$success: #53A351;
+$info: #4AA0B5;
+$danger: #E04A4A;
+$secondary: #6E757C;
+$dark: #353A40;
+$warning: #F99810;
+$light: #F8F9FA;
+$white: #FFFFFF;
+
+$light_text_bg_types: (
+    primary:    $primary,
+    success:    $success,
+    info:       $info,
+    danger:     $danger,
+    secondary:  $secondary,
+    warning:    $warning,
+    dark:       $dark
+);
+
+$dark_text_bg_types: (
+    light:      $light,
+    white:      $white
+);

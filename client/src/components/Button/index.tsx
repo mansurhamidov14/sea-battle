@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { EViewType } from '../../enums';
+import { EViewType, EViewSize } from '../../enums';
 
 import './styles.scss';
 
@@ -9,6 +9,7 @@ interface IProps {
     className?: string;
     disabled?: boolean;
     onClick?: () => void;
+    size?: EViewSize
     view: EViewType;
     width?: number | string
 }
@@ -19,10 +20,11 @@ export const Button: React.FC<IProps> = ({
     children,
     disabled,
     onClick,
+    size = EViewSize.LG,
     view,
     width
 }) => {
-    const classNames = ['button', `button--${view}`];
+    const classNames = ['button', `button--${view}`, `button--${size}`];
     if (block) {
         classNames.push('button--block');
     }

@@ -1,4 +1,7 @@
-import { EAvatarName } from "./enums";
+import {
+    EAvatarName,
+    ENotificationType
+} from './enums';
 
 export interface ICoordinates {
     H: number;
@@ -25,6 +28,16 @@ export interface IMovableFleet extends IFleet {
 }
 
 export interface IUser {
+    id?: string;
     avatar: EAvatarName;
     username: string;
+}
+
+export interface IAwaitingUser extends IUser {
+    hasBeenInvited?: boolean;
+    roomId: string;
+}
+
+export interface INotification extends IUser {
+    type: ENotificationType
 }

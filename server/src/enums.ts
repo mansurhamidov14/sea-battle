@@ -1,5 +1,6 @@
 export enum EEvents {
     ACCEPT_JOIN_REQUEST = 'accept_join_request',
+    DECLINE_JOIN_REQUEST = 'decline_join_request',
     COMPLETE_FLEETS_LOCATING = 'complete_fleets_locating',
     CREATE_ROOM = 'create_room',
     CREATE_USER = 'create_user',
@@ -10,6 +11,7 @@ export enum EEvents {
     SEND_JOIN_REQUEST = 'send_join_request',
     START_GAME = 'start_game',
     START_FLEETS_LOCATING = 'start_fleets_locating',
+    GET_AWAITING_USERS_LIST = 'get_awaiting_users_list'
 }
 
 export enum EUserStatus {
@@ -19,5 +21,5 @@ export enum EUserStatus {
     FLEET_LOCATING_COMPLETED = 'FLEET_LOCATING_COMPLETED',
     FLEET_LOCATING_IN_PROGRESS = 'FLEET_LOCATING_IN_PROGRESS',
     PLAYING = 'PLAYING',
-    UNREGISTERED = 'UNREGISTERED'
+    UNREGISTERED = 'UNREGISTERED',
 }

@@ -15,8 +15,9 @@ interface IUsers {
     list: IUser[];
     create: (user: IUser, socketId: string) => IUsers;
     exists: (username: string) => boolean;
+    getAwaitingUsers: () => IUser[];
     findById: (id: string) => IUser | undefined;
-    setStatus: (id: string, status: EUserStatus) => void;
+    setStatus: (id: string, status: EUserStatus) => IUsers;
     startBattle: (roomId: string) => void; 
     getOpponent: (userId: string, roomId: string) => IUser | undefined;
     getByRoom: (roomId: string) => IUser | undefined;
@@ -42,6 +43,10 @@ class Users implements IUsers {
         return this.list.some(user => username === user.username);
     }
 
+    public getAwaitingUsers (): IUser[] {
+        return this.list.filter(({ status }) => status === EUserStatus.ONLINE);
+    }
+
     public findById (id: string): IUser | undefined {
         return this.list.find(user => user.id === id);
     }
@@ -50,10 +55,11 @@ class Users implements IUsers {
         return this.list.map(user => user.roomId === roomId ? { ...user, status: EUserStatus.PLAYING } : user);
     }
 
-    public setStatus (id: string, status: EUserStatus): void {
+    public setStatus (id: string, status: EUserStatus): IUsers {
         this.list = this.list.map(user => (
             user.id === id ? { ...user, status } : user
         ));
+        return this;
     }
 
     public getByRoom (roomId: string): IUser | undefined {
