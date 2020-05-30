@@ -1,12 +1,23 @@
+import { range } from 'lodash';
+
 import { IFleet } from '../models';
 import { EMovingDirection } from '../enums';
 
 export interface IFleetService {
+    generateFleet: (id: number, size: number) => IFleet;
     moveFleet: (fleet: IFleet, direction: EMovingDirection) => IFleet;
     rotateFleet: (fleet: IFleet) => IFleet;
 }
 
 export class FleetService implements IFleetService {
+    public generateFleet (id: number, size: number): IFleet {
+        const coordinates: IFleet['coordinates'] = range(1, size + 1).map(verticalCoordinate => (
+            { H: 1, V: verticalCoordinate }
+        ));
+
+        return { id, coordinates };
+    }
+
     public moveFleet (fleet: IFleet, direction: EMovingDirection): IFleet {
         if (!fleet) return fleet;
         let movedFleetCoordinates: IFleet['coordinates'] = fleet.coordinates;
@@ -52,7 +63,11 @@ export class FleetService implements IFleetService {
 
         return {
             id: fleet.id,
-            coordinates: newCoordinates[fleet.coordinates.length - 1].H <= 10 ? newCoordinates : fleet.coordinates
+            coordinates:
+                newCoordinates[fleet.coordinates.length - 1].H <= 10 &&
+                newCoordinates[fleet.coordinates.length - 1].V <= 10
+                    ? newCoordinates
+                    : fleet.coordinates
         };
     }
 }

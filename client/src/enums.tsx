@@ -40,10 +40,7 @@ export enum EMovingDirection {
 
 export enum EGameEvents {
     LOCATE_FLEET = 'LOCATE_FLEET',
-    MOVE_FLEET_LEFT = 'MOVE_FLEET_LEFT',
-    MOVE_FLEET_UP = 'MOVE_FLEET_UP',
-    MOVE_FLEET_RIGHT = 'MOVE_FLEET_RIGHT',
-    MOVE_FLEET_DOWN = 'MOVE_FLEET_DOWN',
+    MOVE_FLEET = 'MOVE_FLEET',
     ROTATE_FLEET = 'ROTATE_FLEET',
     UNDO = 'UNDO',
 }

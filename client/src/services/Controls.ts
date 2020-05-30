@@ -1,4 +1,4 @@
-import { EGameEvents, EKeyboardKeyCodes } from '../enums';
+import { EGameEvents, EKeyboardKeyCodes, EMovingDirection } from '../enums';
 
 export interface IControlService {
     init: () => void;
@@ -9,13 +9,13 @@ export class ControlService implements IControlService {
         window.onkeydown = (e:  KeyboardEvent) => {
             let event: any;
             if (e.keyCode === EKeyboardKeyCodes.LEFT) {
-                event = new CustomEvent(EGameEvents.MOVE_FLEET_LEFT);
+                event = new CustomEvent(EGameEvents.MOVE_FLEET, { detail: { direction: EMovingDirection.LEFT }});
             } else if (e.keyCode === EKeyboardKeyCodes.UP) {
-                event = new CustomEvent(EGameEvents.MOVE_FLEET_UP);
+                event = new CustomEvent(EGameEvents.MOVE_FLEET, { detail: { direction: EMovingDirection.UP }});
             } else if (e.keyCode === EKeyboardKeyCodes.RIGHT) {
-                event = new CustomEvent(EGameEvents.MOVE_FLEET_RIGHT);
+                event = new CustomEvent(EGameEvents.MOVE_FLEET, { detail: { direction: EMovingDirection.RIGHT }});
             } else if (e.keyCode === EKeyboardKeyCodes.DOWN) {
-                event = new CustomEvent(EGameEvents.MOVE_FLEET_DOWN);
+                event = new CustomEvent(EGameEvents.MOVE_FLEET, { detail: { direction: EMovingDirection.DOWN }});
             } else if (e.keyCode === EKeyboardKeyCodes.ROTATION) {
                 event = new CustomEvent(EGameEvents.ROTATE_FLEET);
             } else if (e.keyCode === EKeyboardKeyCodes.SPACE) {

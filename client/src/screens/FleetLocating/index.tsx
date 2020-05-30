@@ -31,17 +31,8 @@ export class FleetLocatingScreen extends React.Component<{}, IState> {
     }
 
     componentDidMount () {
-        window.addEventListener(EGameEvents.MOVE_FLEET_UP, () => {
-            this.setCurrentFleetCoordinates(this.fleetService.moveFleet(this.state.currentFleet, EMovingDirection.UP));
-        });
-        window.addEventListener(EGameEvents.MOVE_FLEET_RIGHT, () => {
-            this.setCurrentFleetCoordinates(this.fleetService.moveFleet(this.state.currentFleet, EMovingDirection.RIGHT));
-        });
-        window.addEventListener(EGameEvents.MOVE_FLEET_DOWN, () => {
-            this.setCurrentFleetCoordinates(this.fleetService.moveFleet(this.state.currentFleet, EMovingDirection.DOWN));
-        });
-        window.addEventListener(EGameEvents.MOVE_FLEET_LEFT, () => {
-            this.setCurrentFleetCoordinates(this.fleetService.moveFleet(this.state.currentFleet, EMovingDirection.LEFT));
+        window.addEventListener(EGameEvents.MOVE_FLEET, (event: any) => {
+            this.setCurrentFleetCoordinates(this.fleetService.moveFleet(this.state.currentFleet, event.detail.direction));
         });
         window.addEventListener(EGameEvents.ROTATE_FLEET, () => {
             this.setCurrentFleetCoordinates(this.fleetService.rotateFleet(this.state.currentFleet));
@@ -67,39 +58,14 @@ export class FleetLocatingScreen extends React.Component<{}, IState> {
         if (locatedFleets.length === prevState.locatedFleets.length) {
             return false;
         }
-        
-        if (!locatedFleets.length) {
-            this.setCurrentFleetCoordinates({
-                id: 1,
-                coordinates: [
-                    { H: 1, V: 1 },
-                    { H: 1, V: 2 },
-                    { H: 1, V: 3 },
-                    { H: 1, V: 4 }
-                ]
-            });
-        } else if (locatedFleets.length < 3) {
-            this.setCurrentFleetCoordinates({
-                id: locatedFleets.length + 1,
-                coordinates: [
-                    { H: 1, V: 1 },
-                    { H: 1, V: 2 },
-                    { H: 1, V: 3 }
-                ]
-            });
-        } else if (locatedFleets.length < 6) {
-            this.setCurrentFleetCoordinates({
-                id: locatedFleets.length + 1,
-                coordinates: [
-                    { H: 1, V: 1 },
-                    { H: 1, V: 2 }
-                ]
-            });
-        } else if (locatedFleets.length < 10) {
-            this.setCurrentFleetCoordinates({
-                id: locatedFleets.length + 1,
-                coordinates: [{ H: 1, V: 1 }]
-            });
+        const nextFleetId: number = locatedFleets.length + 1;
+        const nextFleetSize: number =
+            !locatedFleets.length ? 4 :
+            locatedFleets.length < 3 ? 3 :
+            locatedFleets.length < 6 ? 2 :
+            locatedFleets.length < 10 ? 1 : 0
+        if (nextFleetSize) {
+            this.setCurrentFleetCoordinates(this.fleetService.generateFleet(nextFleetId, nextFleetSize))
         } else {
             this.setState({ currentFleet: null as any });
         }
