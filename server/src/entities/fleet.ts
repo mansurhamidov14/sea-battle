@@ -9,7 +9,7 @@ interface IFleetCoordinates extends ICoordinates {
 
 interface IUserFleet {
     id: number;
-    fleet: IFleetCoordinates[];
+    coordinates: IFleetCoordinates[];
     wasDestroyed: boolean;
 }
 
@@ -29,7 +29,7 @@ interface IFireResult {
 interface IFleets {
     list: IUsersFleets[];
     fire: (coordinates: ICoordinates, userId: string) => IFireResult;
-    setUserFleets: (userId: string, fleets: IUserFleet[]) => void;
+    setUserFleets: (userId: string, fleets: IUserFleet[]) => IFleets;
 }
 
 class Fleets implements IFleets {
@@ -49,7 +49,7 @@ class Fleets implements IFleets {
                             ...item,
                             fleets: item.fleets.map(
                                 fleetItem => {
-                                    const updatedFleet: IFleetCoordinates[] = fleetItem.fleet.map(
+                                    const updatedFleet: IFleetCoordinates[] = fleetItem.coordinates.map(
                                         ({ H, V, wasFired }) => {
                                             if (coordinates.H === H && coordinates.V === V && !wasFired) {
                                                 firedFleetId = fleetItem.id;
@@ -59,11 +59,14 @@ class Fleets implements IFleets {
                                             return { H, V, wasFired };
                                         }
                                     );
-                                    wasDestroyed = updatedFleet.every(({ wasFired }) => wasFired);
+                                    if (fleetItem.id === firedFleetId) {
+                                        wasDestroyed = updatedFleet.every(({ wasFired }) => wasFired);
+                                    }
+
                                     return {
                                         id: fleetItem.id,
-                                        fleet: updatedFleet,
-                                        wasDestroyed
+                                        coordinates: updatedFleet,
+                                        wasDestroyed: firedFleetId === fleetItem.id ? wasDestroyed : fleetItem.wasDestroyed
                                     };
                                 }
                             )
@@ -83,11 +86,12 @@ class Fleets implements IFleets {
         };
     }
 
-    public setUserFleets (userId: string, fleets: IUserFleet[]): void {
+    public setUserFleets (userId: string, fleets: IUserFleet[]): IFleets {
         this.list = [
             ...this.list.filter(item => item.userId !== userId),
             { userId, fleets }
         ];
+        return this;
     }
 }
 

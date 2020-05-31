@@ -5,29 +5,11 @@ $fleet-height: $gameplay-area-height / 10;
 $fleet-border-width: 4px;
 
 .opponent-fleet {
-    position: absolute;
     display: flex;
     box-sizing: border-box;
 
-    &--horizontal {
-        height: $fleet-height;
-
-        .opponent-fleet__item {
-            transform: rotate(270deg);
-
-            &::after {
-                transform: rotate(90deg);
-            }
-        }
-    }
-
-    &--vertical {
-        width: $fleet-width;
-        flex-direction: column;
-    }
-
     &__item {
-        position: relative;
+        position: absolute;
         width: $fleet-width;
         height: $fleet-height;
 

@@ -7,6 +7,8 @@ import { EPlayingMode } from '../../enums';
 import { IFleet, IOpponentFleet, ICoordinates } from '../../models';
 
 interface IProps {
+    firedCoordinatesOfOpponent: ICoordinates[];
+    firedCoordinatesOfUser: ICoordinates[];
     onFire: (V: number, H: number) => void;
     opponentFleets: IOpponentFleet[];
     playingMode: EPlayingMode
@@ -14,25 +16,17 @@ interface IProps {
 }
 
 export const GameScreen: React.FC<IProps> = ({
+    firedCoordinatesOfOpponent,
+    firedCoordinatesOfUser,
     onFire,
     opponentFleets,
     playingMode,
     userFleets
 }) => {
-    const [firedCoordinates, setFiredCoordinates] = React.useState<ICoordinates[]>([]);
-
-    const handleFire = React.useCallback(
-        (V: number, H: number) => {
-            onFire(V, H);
-            setFiredCoordinates(state => [...state, { V, H }]);
-        },
-        [onFire]
-    )
-
     if (playingMode === EPlayingMode.WATCHING) {
         return (
             <Sea>
-                <GameGrid>
+                <GameGrid firedCoordinates={firedCoordinatesOfUser}>
                     {userFleets.map(fleet => (
                         <Fleet key={fleet.id} coordinates={fleet.coordinates} />
                     ))}
@@ -43,13 +37,13 @@ export const GameScreen: React.FC<IProps> = ({
         return (
             <GameGrid
                 blackBordered
-                onClickItem={handleFire}
-                firedCoordinates={firedCoordinates}
+                onClickItem={onFire}
+                firedCoordinates={firedCoordinatesOfOpponent}
             >
                 {opponentFleets.map(fleet => (
                     <OpponentFleet key={fleet.id} {...fleet} />
                 ))}
             </GameGrid>
-        )
+        );
     }
 }

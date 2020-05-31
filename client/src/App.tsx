@@ -13,6 +13,7 @@ import {
 } from './enums';
 import {
     IAwaitingUser,
+    ICoordinates,
     IFleet,
     INotification,
     IOpponentFleet,
@@ -24,6 +25,8 @@ import { SignUpScreen } from './screens/SignUp';
 
 interface IAppState {
     awaitingUsers: IAwaitingUser[];
+    firedCoordinatesOfOpponent: ICoordinates[];
+    firedCoordinatesOfUser: ICoordinates[];
     fleets: IFleet[];
     notifications: INotification[];
     opponentFleets: IOpponentFleet[];
@@ -40,6 +43,8 @@ class App extends React.Component<{}, IAppState> {
         super(props);
         this.state = {
             awaitingUsers: [],
+            firedCoordinatesOfOpponent: [],
+            firedCoordinatesOfUser: [],
             notifications: [],
             userStatus: EUserStatus.UNREGISTERED,
             fleets: [],
@@ -76,7 +81,7 @@ class App extends React.Component<{}, IAppState> {
         this.socket.emit(
             EEvents.CREATE_USER, 
             this.state.user,
-            (userId: string) => this.setState(state =>({
+            (userId: string) => this.setState(state => ({
                 user: { ...state.user, id: userId },
                 userStatus: EUserStatus.ONLINE
             }))
@@ -142,9 +147,13 @@ class App extends React.Component<{}, IAppState> {
 
     fireOpponent (V: number, H: number) {
         this.socket.emit(EEvents.FIRE, { V, H }, (firedFleetId: number | null, wasDestroyed: boolean) => {
+            const newState = {
+                firedCoordinatesOfOpponent: [...this.state.firedCoordinatesOfOpponent, { V, H }]
+            };
             if (firedFleetId) {
                 if (this.state.opponentFleets.some(fleet => fleet.id === firedFleetId)) {
                     this.setState(state => ({
+                        ...newState,
                         opponentFleets: state.opponentFleets.map(
                             fleet => {
                                 if (fleet.id === firedFleetId) {
@@ -156,17 +165,20 @@ class App extends React.Component<{}, IAppState> {
                                 }
                                 return fleet;
                             }
-                        )
+                        ),
                     }))
                 } else {
                     this.setState(state => ({
+                        ...newState,
                         opponentFleets: [...state.opponentFleets, {
                             id: firedFleetId,
                             wasDestroyed,
                             coordinates: [{ H, V}]
-                        }]
+                        }],
                     }));
                 }
+            } else {
+                this.setState({ ...newState, playingMode: EPlayingMode.WATCHING });
             }
         });
     }
@@ -184,6 +196,13 @@ class App extends React.Component<{}, IAppState> {
                     ...state.notifications,
                     { ...invitation, type: ENotificationType.RECEIVED_INVITATION }
                 ]
+            }));
+        });
+        this.socket.on(EEvents.FIRE, (firedFleetId: string | null, fleets: IFleet[], coordinates: ICoordinates) => {
+            this.setState(state => ({
+                playingMode: firedFleetId ? EPlayingMode.WATCHING : EPlayingMode.FIRING,
+                firedCoordinatesOfUser: [...state.firedCoordinatesOfUser, coordinates],
+                fleets: firedFleetId ? fleets : state.fleets
             }));
         });
         this.socket.on(EEvents.DECLINE_JOIN_REQUEST, (rejectedUser: IAwaitingUser) => {
@@ -237,6 +256,8 @@ class App extends React.Component<{}, IAppState> {
                 )}
                 {EUserStatus.PLAYING === this.state.userStatus && (
                     <GameScreen
+                        firedCoordinatesOfOpponent={this.state.firedCoordinatesOfOpponent}
+                        firedCoordinatesOfUser={this.state.firedCoordinatesOfUser}
                         playingMode={this.state.playingMode as any}
                         userFleets={this.state.fleets}
                         opponentFleets={this.state.opponentFleets}
