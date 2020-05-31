@@ -106,7 +106,7 @@ class App extends React.Component<{}, IAppState> {
             message: type === DECLINED_INVITATION
                 ? `${username} has declined your invitation` : `${username} wants to play with you`,
             title: type === DECLINED_INVITATION ? 'Your invitation has been declined' : 'You have got new invitation',
-            view: type === DECLINED_INVITATION ? EViewType.DANGER : EViewType.SECONDARY,
+            view: type === DECLINED_INVITATION ? EViewType.DANGER : EViewType.SUCCESS,
             onClose: type === DECLINED_INVITATION
                 ? () => this.removeNotification(notification)
                 : () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)

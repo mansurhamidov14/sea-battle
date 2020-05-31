@@ -27,7 +27,7 @@ export const WaitingRoomScreen: React.FC<IProps> = ({
                         <Button
                             disabled={user.hasBeenInvited}
                             onClick={() => onPlay(user.roomId)}
-                            view={EViewType.PRIMARY}
+                            view={user.hasBeenInvited ? EViewType.SECONDARY : EViewType.PRIMARY}
                             size={EViewSize.SM}
                         >
                             {user.hasBeenInvited ? 'Invited' : 'Play'}

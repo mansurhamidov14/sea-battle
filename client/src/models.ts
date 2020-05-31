@@ -41,3 +41,11 @@ export interface IAwaitingUser extends IUser {
 export interface INotification extends IUser {
     type: ENotificationType
 }
+
+interface IFireResult {
+    firedFleetId: number | null;
+    fleets: IUserFleet[];
+    isGameOver: boolean;
+    wasDestroyed: boolean;
+    wasFired: boolean;
+}

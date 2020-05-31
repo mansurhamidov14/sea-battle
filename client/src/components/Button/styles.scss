@@ -62,4 +62,9 @@
     &--warning {
         @include generate_button(#FFBB35, #FA8100, #C35D01);
     }
+
+    &--secondary {
+        @include generate_button(#CCC, #AAA, #999);
+        color: #444;
+    }
 }
