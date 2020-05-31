@@ -50,8 +50,7 @@ class App extends React.Component<{}, IAppState> {
             }
         }
 
-        const socketUrl = 'http://192.168.1.108:8080';
-        this.socket = io(socketUrl);
+        this.socket = io();
         this.controlService = new ControlService();
     }
 
