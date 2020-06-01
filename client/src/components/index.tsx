@@ -4,5 +4,6 @@ export { Button } from './Button';
 export { Fleet } from './Fleet';
 export { GameGrid } from './GameGrid';
 export { Layout } from './Layout';
+export { Modal } from './Modal';
 export { OpponentFleet } from './OpponentFleet'
 export { Sea } from './Sea';

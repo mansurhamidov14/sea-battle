@@ -25,6 +25,16 @@ io.on('connection', socket => {
         io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
     });
 
+    socket.on(EEvents.FINISH_BATTLE, (callback) => {
+        const roomId = uuid();
+
+        users.joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
+        socket.leaveAll();
+        socket.join(roomId);
+        io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
+        callback();
+    });
+
     socket.on(EEvents.SEND_JOIN_REQUEST, (roomId) => {
         const roomHost = users.getByRoom(roomId);
         const user = users.findById(socket.id);
@@ -76,8 +86,8 @@ io.on('connection', socket => {
             const opponent = users.getOpponent(socket.id, roomId);
             if (opponent) {
                 const fireResult = fleets.fire(coordinates, opponent.id);
-                callback(fireResult.firedFleetId, fireResult.wasDestroyed);
-                io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates);
+                callback(fireResult.firedFleetId, fireResult.wasDestroyed, fireResult.isGameOver);
+                io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates, fireResult.isGameOver);
             }
         }
     });

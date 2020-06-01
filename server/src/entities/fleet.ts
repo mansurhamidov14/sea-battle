@@ -78,7 +78,10 @@ class Fleets implements IFleets {
         }
 
         return {
-            isGameOver: this.list.every(fleets => fleets.fleets.every(fleet => fleet.wasDestroyed)),
+            isGameOver:
+                this.list
+                    .filter(fleet => fleet.userId === userId)
+                    .every(fleets => fleets.fleets.every(fleet => fleet.wasDestroyed)),
             fleets: this.list.find(fleets => fleets.userId === userId)?.fleets as IUserFleet[],
             firedFleetId,
             wasDestroyed,

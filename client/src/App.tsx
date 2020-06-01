@@ -1,7 +1,7 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 
-import { Alert, Layout } from './components';
+import { Alert, Layout, Modal } from './components';
 import { IAlertProps } from './components/Alert';
 import {
     EAvatarName,
@@ -28,11 +28,28 @@ interface IAppState {
     firedCoordinatesOfOpponent: ICoordinates[];
     firedCoordinatesOfUser: ICoordinates[];
     fleets: IFleet[];
+    isGameOver: boolean;
+    isWinner?: boolean;
     notifications: INotification[];
     opponentFleets: IOpponentFleet[];
     user: IUser;
     userStatus: EUserStatus;
     playingMode?: EPlayingMode;
+}
+
+const initailState: IAppState = {
+    awaitingUsers: [],
+    firedCoordinatesOfOpponent: [],
+    firedCoordinatesOfUser: [],
+    notifications: [],
+    userStatus: EUserStatus.UNREGISTERED,
+    fleets: [],
+    isGameOver: false,
+    opponentFleets: [],
+    user: {
+        avatar: EAvatarName.BOY_1,
+        username: '',
+    }
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -48,6 +65,7 @@ class App extends React.Component<{}, IAppState> {
             notifications: [],
             userStatus: EUserStatus.UNREGISTERED,
             fleets: [],
+            isGameOver: false,
             opponentFleets: [],
             user: {
                 avatar: EAvatarName.BOY_1,
@@ -146,40 +164,62 @@ class App extends React.Component<{}, IAppState> {
     }
 
     fireOpponent (V: number, H: number) {
-        this.socket.emit(EEvents.FIRE, { V, H }, (firedFleetId: number | null, wasDestroyed: boolean) => {
-            const newState = {
-                firedCoordinatesOfOpponent: [...this.state.firedCoordinatesOfOpponent, { V, H }]
-            };
-            if (firedFleetId) {
-                if (this.state.opponentFleets.some(fleet => fleet.id === firedFleetId)) {
-                    this.setState(state => ({
-                        ...newState,
-                        opponentFleets: state.opponentFleets.map(
-                            fleet => {
-                                if (fleet.id === firedFleetId) {
-                                    return {
-                                        ...fleet,
-                                        wasDestroyed,
-                                        coordinates: [...fleet.coordinates, { V, H }]
-                                    };
+        this.socket.emit(
+            EEvents.FIRE,
+            { V, H },
+            (
+                firedFleetId: number | null,
+                wasDestroyed: boolean,
+                isGameOver: boolean
+            ) => {
+                const newState = {
+                    firedCoordinatesOfOpponent: [...this.state.firedCoordinatesOfOpponent, { V, H }],
+                    isGameOver,
+                    isWinner: isGameOver ? true : undefined
+                };
+                if (firedFleetId) {
+                    if (this.state.opponentFleets.some(fleet => fleet.id === firedFleetId)) {
+                        this.setState(state => ({
+                            ...newState,
+                            opponentFleets: state.opponentFleets.map(
+                                fleet => {
+                                    if (fleet.id === firedFleetId) {
+                                        return {
+                                            ...fleet,
+                                            wasDestroyed,
+                                            coordinates: [...fleet.coordinates, { V, H }]
+                                        };
+                                    }
+                                    return fleet;
                                 }
-                                return fleet;
-                            }
-                        ),
-                    }))
+                            ),
+                        }))
+                    } else {
+                        this.setState(state => ({
+                            ...newState,
+                            opponentFleets: [...state.opponentFleets, {
+                                id: firedFleetId,
+                                wasDestroyed,
+                                coordinates: [{ H, V}]
+                            }],
+                        }));
+                    }
                 } else {
-                    this.setState(state => ({
-                        ...newState,
-                        opponentFleets: [...state.opponentFleets, {
-                            id: firedFleetId,
-                            wasDestroyed,
-                            coordinates: [{ H, V}]
-                        }],
-                    }));
+                    this.setState({ ...newState, playingMode: EPlayingMode.WATCHING });
                 }
-            } else {
-                this.setState({ ...newState, playingMode: EPlayingMode.WATCHING });
             }
+        );
+    }
+
+    finishBattle () {
+        this.socket.emit(EEvents.FINISH_BATTLE, () => {
+            this.setState(state => ({
+                ...initailState,
+                awaitingUsers: state.awaitingUsers,
+                user: state.user,
+                userStatus: EUserStatus.ONLINE,
+                notifications: state.notifications
+            }));
         });
     }
 
@@ -198,13 +238,22 @@ class App extends React.Component<{}, IAppState> {
                 ]
             }));
         });
-        this.socket.on(EEvents.FIRE, (firedFleetId: string | null, fleets: IFleet[], coordinates: ICoordinates) => {
-            this.setState(state => ({
-                playingMode: firedFleetId ? EPlayingMode.WATCHING : EPlayingMode.FIRING,
-                firedCoordinatesOfUser: [...state.firedCoordinatesOfUser, coordinates],
-                fleets: firedFleetId ? fleets : state.fleets
-            }));
-        });
+        this.socket.on(
+            EEvents.FIRE,
+            (
+                firedFleetId: string | null,
+                fleets: IFleet[], coordinates: ICoordinates,
+                isGameOver: boolean
+            ) => {
+                this.setState(state => ({
+                    playingMode: firedFleetId ? EPlayingMode.WATCHING : EPlayingMode.FIRING,
+                    firedCoordinatesOfUser: [...state.firedCoordinatesOfUser, coordinates],
+                    fleets: firedFleetId ? fleets : state.fleets,
+                    isGameOver,
+                    isWinner: isGameOver ? false : undefined
+                }));
+            }
+        );
         this.socket.on(EEvents.DECLINE_JOIN_REQUEST, (rejectedUser: IAwaitingUser) => {
             this.setState(state => ({
                 awaitingUsers: state.awaitingUsers.map(user => ({
@@ -267,6 +316,12 @@ class App extends React.Component<{}, IAppState> {
                 {Boolean(this.state.notifications.length) && this.state.notifications.map((notification, index) => (
                     <Alert key={index} {...this.getNotificationData(notification)} />
                 ))}
+                <Modal
+                    isVisible={this.state.isGameOver}
+                    onClose={this.finishBattle.bind(this)}
+                >
+                    {this.state.isWinner ? 'WON' : 'LOST'}
+                </Modal>
             </Layout>
         );
     }

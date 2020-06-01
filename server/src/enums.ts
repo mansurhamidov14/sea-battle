@@ -4,6 +4,7 @@ export enum EEvents {
     COMPLETE_FLEETS_LOCATING = 'complete_fleets_locating',
     CREATE_ROOM = 'create_room',
     CREATE_USER = 'create_user',
+    FINISH_BATTLE = 'finish_battle',
     DISCONNECT = 'disconnect',
     FIRE = 'fire',
     MESSAGE = 'message',
