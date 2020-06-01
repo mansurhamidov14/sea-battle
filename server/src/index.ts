@@ -27,9 +27,10 @@ io.on('connection', socket => {
 
     socket.on(EEvents.FINISH_BATTLE, (callback) => {
         const roomId = uuid();
+        const user = users.findById(socket.id)
 
         users.joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
-        socket.leaveAll();
+        socket.leave(user?.roomId as any);
         socket.join(roomId);
         io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
         callback();
