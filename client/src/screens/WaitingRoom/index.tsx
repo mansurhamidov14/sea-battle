@@ -8,7 +8,7 @@ import './styles.scss';
 
 interface IProps {
     awaitingUsers: IAwaitingUser[];
-    onPlay: (roomId: string) => void;
+    onPlay: (player: IAwaitingUser) => void;
 }
 
 export const WaitingRoomScreen: React.FC<IProps> = ({
@@ -26,7 +26,7 @@ export const WaitingRoomScreen: React.FC<IProps> = ({
                         <Avatar size={96} name={user.avatar} />
                         <Button
                             disabled={user.hasBeenInvited}
-                            onClick={() => onPlay(user.roomId)}
+                            onClick={() => onPlay(user)}
                             view={user.hasBeenInvited ? EViewType.SECONDARY : EViewType.PRIMARY}
                             size={EViewSize.SM}
                         >

@@ -5,7 +5,7 @@ $cell-border-black: 1px solid black;
 $fleet-border-width: 4px;
 
 .grid {
-    width: 100%;
+    width: $gameplay-area-width;
     background: rgba(255, 255, 255, 0.25);
     box-sizing: border-box;
     position: relative;

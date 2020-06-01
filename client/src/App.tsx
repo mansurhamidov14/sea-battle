@@ -1,7 +1,7 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 
-import { Alert, Layout, Modal } from './components';
+import { Alert, Layout, GameOverModal } from './components';
 import { IAlertProps } from './components/Alert';
 import {
     EAvatarName,
@@ -30,17 +30,21 @@ interface IAppState {
     fleets: IFleet[];
     isGameOver: boolean;
     isWinner?: boolean;
+    lostTimes: number;
     notifications: INotification[];
     opponentFleets: IOpponentFleet[];
     user: IUser;
+    opponent?: IUser;
     userStatus: EUserStatus;
     playingMode?: EPlayingMode;
+    wonTimes: number;
 }
 
 const initailState: IAppState = {
     awaitingUsers: [],
     firedCoordinatesOfOpponent: [],
     firedCoordinatesOfUser: [],
+    lostTimes: 0,
     notifications: [],
     userStatus: EUserStatus.UNREGISTERED,
     fleets: [],
@@ -49,7 +53,8 @@ const initailState: IAppState = {
     user: {
         avatar: EAvatarName.BOY_1,
         username: '',
-    }
+    },
+    wonTimes: 0
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -58,20 +63,7 @@ class App extends React.Component<{}, IAppState> {
 
     constructor (props: {}) {
         super(props);
-        this.state = {
-            awaitingUsers: [],
-            firedCoordinatesOfOpponent: [],
-            firedCoordinatesOfUser: [],
-            notifications: [],
-            userStatus: EUserStatus.UNREGISTERED,
-            fleets: [],
-            isGameOver: false,
-            opponentFleets: [],
-            user: {
-                avatar: EAvatarName.BOY_1,
-                username: '',
-            }
-        }
+        this.state = initailState
 
         this.socket = io();
         this.controlService = new ControlService();
@@ -117,7 +109,10 @@ class App extends React.Component<{}, IAppState> {
                 },
                 {
                     label: 'Accept',
-                    onClick: () => this.reactToInvitation(notification.id as string, EEvents.ACCEPT_JOIN_REQUEST)
+                    onClick: () => {
+                        this.reactToInvitation(notification.id as string, EEvents.ACCEPT_JOIN_REQUEST);
+                        this.setState({ opponent: notification });
+                    }
                 }
             ] : undefined,
             avatarName: notification.avatar,
@@ -144,13 +139,14 @@ class App extends React.Component<{}, IAppState> {
         this.socket.emit(reaction, userId);
     }
 
-    invitePlayer (roomId: string) {
-        this.socket.emit(EEvents.SEND_JOIN_REQUEST, roomId);
+    invitePlayer (player: IAwaitingUser) {
+        this.socket.emit(EEvents.SEND_JOIN_REQUEST, player.roomId);
         this.setState(state => ({
             awaitingUsers: state.awaitingUsers.map(user => ({
                 ...user,
-                hasBeenInvited: user.roomId === roomId || user.hasBeenInvited
-            }))
+                hasBeenInvited: user.roomId === player.roomId || user.hasBeenInvited
+            })),
+            opponent: player
         }));
     }
 
@@ -175,7 +171,8 @@ class App extends React.Component<{}, IAppState> {
                 const newState = {
                     firedCoordinatesOfOpponent: [...this.state.firedCoordinatesOfOpponent, { V, H }],
                     isGameOver,
-                    isWinner: isGameOver ? true : undefined
+                    isWinner: isGameOver ? true : undefined,
+                    wonTimes: isGameOver ? this.state.wonTimes + 1 : this.state.wonTimes
                 };
                 if (firedFleetId) {
                     if (this.state.opponentFleets.some(fleet => fleet.id === firedFleetId)) {
@@ -250,7 +247,8 @@ class App extends React.Component<{}, IAppState> {
                     firedCoordinatesOfUser: [...state.firedCoordinatesOfUser, coordinates],
                     fleets: firedFleetId ? fleets : state.fleets,
                     isGameOver,
-                    isWinner: isGameOver ? false : undefined
+                    isWinner: isGameOver ? false : undefined,
+                    lostTimes: isGameOver ? state.lostTimes + 1 : state.lostTimes
                 }));
             }
         );
@@ -263,7 +261,8 @@ class App extends React.Component<{}, IAppState> {
                 notifications: [
                     ...state.notifications,
                     { ...rejectedUser, type: ENotificationType.DECLINED_INVITATION }
-                ]
+                ],
+                opponent: undefined
             }));
         });
         this.socket.on(EEvents.START_FLEETS_LOCATING, () => {
@@ -316,12 +315,15 @@ class App extends React.Component<{}, IAppState> {
                 {Boolean(this.state.notifications.length) && this.state.notifications.map((notification, index) => (
                     <Alert key={index} {...this.getNotificationData(notification)} />
                 ))}
-                <Modal
+                <GameOverModal
                     isVisible={this.state.isGameOver}
-                    onClose={this.finishBattle.bind(this)}
-                >
-                    {this.state.isWinner ? 'WON' : 'LOST'}
-                </Modal>
+                    onFinishGame={this.finishBattle.bind(this)}
+                    user={this.state.user}
+                    opponent={this.state.opponent}
+                    isWinner={this.state.isWinner}
+                    wonTimes={this.state.wonTimes}
+                    lostTimes={this.state.lostTimes}
+                />
             </Layout>
         );
     }

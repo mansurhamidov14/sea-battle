@@ -1,0 +1,57 @@
+@import '../../assets/styles/mixins.scss';
+
+.game-over-modal{
+    font-family: 'Righteous', cursive;
+    padding: 0 15px;
+
+    &__result {
+        padding: 15px 0;
+        text-align: center;
+        font-size: 40px;
+        letter-spacing: 2px;
+
+        &--winner {
+            color: #53A351;
+        }
+
+        &--loser {
+            color: #E04A4A;
+        }
+    }
+
+    &__content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+
+        &__user {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+
+            &__name {
+                line-height: 40px;
+                font-size: 24px;
+            }
+        }
+
+        &__score {
+            font-size: 24px;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 28px;
+
+            @include applyViewTypes();
+        }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: center;
+        width: 400px;
+        margin: 30px auto;
+    }
+}
