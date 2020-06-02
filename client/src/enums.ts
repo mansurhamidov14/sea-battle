@@ -2,6 +2,8 @@ export enum EEvents {
     ACCEPT_JOIN_REQUEST = 'accept_join_request',
     DECLINE_JOIN_REQUEST = 'decline_join_request',
     COMPLETE_FLEETS_LOCATING = 'complete_fleets_locating',
+    REVENGE_REQUESTED = 'revenge_requested',
+    OPPONENT_REVENGE_REFUSAL = 'opponent_revenge_refusal',
     CREATE_ROOM = 'create_room',
     CREATE_USER = 'create_user',
     FINISH_BATTLE = 'finish_battle',
@@ -66,6 +68,7 @@ export enum EViewSize {
 export enum ENotificationType {
     DECLINED_INVITATION = 'DECLINED_INVITATION',
     RECEIVED_INVITATION = 'RECEIVED_INVITATION',
+    REVENGE_REQUESTED = 'REVENGE_REQUESTED'
 }
 
 export enum EPlayingMode {

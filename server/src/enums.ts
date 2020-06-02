@@ -1,6 +1,8 @@
 export enum EEvents {
     ACCEPT_JOIN_REQUEST = 'accept_join_request',
     DECLINE_JOIN_REQUEST = 'decline_join_request',
+    REVENGE_REQUESTED = 'revenge_requested',
+    OPPONENT_REVENGE_REFUSAL = 'opponent_revenge_refusal',
     COMPLETE_FLEETS_LOCATING = 'complete_fleets_locating',
     CREATE_ROOM = 'create_room',
     CREATE_USER = 'create_user',

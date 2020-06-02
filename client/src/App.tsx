@@ -99,10 +99,10 @@ class App extends React.Component<{}, IAppState> {
     }
 
     getNotificationData (notification: INotification): IAlertProps {
-        const { DECLINED_INVITATION, RECEIVED_INVITATION } = ENotificationType;
+        const { DECLINED_INVITATION, RECEIVED_INVITATION, REVENGE_REQUESTED } = ENotificationType;
         const { username, type } = notification
         return {
-            actions: type === RECEIVED_INVITATION ? [
+            actions: type === RECEIVED_INVITATION || type === REVENGE_REQUESTED ? [
                 {
                     label: 'Decline',
                     onClick: () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
@@ -116,13 +116,34 @@ class App extends React.Component<{}, IAppState> {
                 }
             ] : undefined,
             avatarName: notification.avatar,
-            message: type === DECLINED_INVITATION
-                ? `${username} has declined your invitation` : `${username} wants to play with you`,
-            title: type === DECLINED_INVITATION ? 'Your invitation has been declined' : 'You have got new invitation',
+            message: this.getNotificationMessage(type, username),
+            title: this.getNotificationTitle(type),
             view: type === DECLINED_INVITATION ? EViewType.DANGER : EViewType.SUCCESS,
             onClose: type === DECLINED_INVITATION
                 ? () => this.removeNotification(notification)
                 : () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
+        }
+    }
+
+    getNotificationTitle (type: ENotificationType) {
+        switch (type) {
+            case ENotificationType.REVENGE_REQUESTED:
+                return 'Revenge request';
+            case ENotificationType.RECEIVED_INVITATION: 
+                return 'You have got new invitation';
+            case ENotificationType.DECLINED_INVITATION:
+                return 'Your invitation has been declined';
+        }
+    }
+
+    getNotificationMessage (type: ENotificationType, username?: string) {
+        switch (type) {
+            case ENotificationType.REVENGE_REQUESTED:
+                return `${username} wants to play again`;
+            case ENotificationType.RECEIVED_INVITATION: 
+                return `${username} wants to play with you`;
+            case ENotificationType.DECLINED_INVITATION:
+                return `${username} has declined your invitation`;
         }
     }
 
@@ -134,7 +155,7 @@ class App extends React.Component<{}, IAppState> {
 
     reactToInvitation (userId: string, reaction: EEvents.ACCEPT_JOIN_REQUEST | EEvents.DECLINE_JOIN_REQUEST) {
         this.setState(state => ({
-            notifications: state.notifications.filter(({ id, type }) => !(id === userId && type === ENotificationType.RECEIVED_INVITATION))
+            notifications: state.notifications.filter(({ id, type }) => !(id === userId && type === ENotificationType.RECEIVED_INVITATION || type === ENotificationType.REVENGE_REQUESTED))
         }));
         this.socket.emit(reaction, userId);
     }
@@ -220,6 +241,10 @@ class App extends React.Component<{}, IAppState> {
         });
     }
 
+    requestRevenge (roomId: string) {
+        this.socket.emit(EEvents.REVENGE_REQUESTED, roomId);
+    }
+
     componentDidMount () {
         this.controlService.init();
         this.socket.on(EEvents.GET_AWAITING_USERS_LIST, (users: IAwaitingUser[]) => {
@@ -266,12 +291,31 @@ class App extends React.Component<{}, IAppState> {
             }));
         });
         this.socket.on(EEvents.START_FLEETS_LOCATING, () => {
-            this.setState({ userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS });
+            this.setState({
+                userStatus: EUserStatus.FLEET_LOCATING_IN_PROGRESS,
+                fleets: [],
+                opponentFleets: [],
+                firedCoordinatesOfOpponent: [],
+                firedCoordinatesOfUser: [],
+                isGameOver: false,
+                notifications: [],
+            });
         });
         this.socket.on(EEvents.START_GAME, (firstFireUserId: string) => {
             this.setState(state => ({
                 playingMode: Number(firstFireUserId === state.user.id),
                 userStatus: EUserStatus.PLAYING
+            }));
+        });
+        this.socket.on(EEvents.OPPONENT_REVENGE_REFUSAL, () => {
+            window.dispatchEvent(new CustomEvent(EEvents.OPPONENT_REVENGE_REFUSAL));
+        });
+        this.socket.on(EEvents.REVENGE_REQUESTED, () => {
+            this.setState(state => ({
+                notifications: [
+                    ...state.notifications,
+                    { ...state.opponent as IUser, type: ENotificationType.REVENGE_REQUESTED }
+                ]
             }));
         });
     }
@@ -318,8 +362,9 @@ class App extends React.Component<{}, IAppState> {
                 <GameOverModal
                     isVisible={this.state.isGameOver}
                     onFinishGame={this.finishBattle.bind(this)}
+                    onRevengeRequest={this.requestRevenge.bind(this)}
                     user={this.state.user}
-                    opponent={this.state.opponent}
+                    opponent={this.state.opponent as any}
                     isWinner={this.state.isWinner}
                     wonTimes={this.state.wonTimes}
                     lostTimes={this.state.lostTimes}

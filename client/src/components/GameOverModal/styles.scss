@@ -32,6 +32,14 @@
             align-items: center;
             text-align: center;
 
+            &--fade-out {
+                opacity: 0;
+                -webkit-animation: fadeout 0.4s ease 0s 1 normal;
+                -moz-animation: fadeout 0.4s ease 0s 1 normal;
+                -ms-animation: fadeout 0.4s ease 0s 1 normal;
+                animation: fadeout 0.4s ease 0s 1 normal;
+            }
+
             &__name {
                 line-height: 40px;
                 font-size: 24px;
@@ -53,5 +61,20 @@
         justify-content: center;
         width: 400px;
         margin: 30px auto;
+    }
+}
+
+@keyframes fadeout {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 0.1;
+        transform: translateY(-54px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px);
     }
 }

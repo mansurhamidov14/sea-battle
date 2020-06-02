@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { EViewType, EViewSize } from '../../enums';
-import { IUser } from '../../models';
+import { EViewType, EViewSize, EEvents } from '../../enums';
+import { IUser, IAwaitingUser } from '../../models';
 import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { Modal } from '../Modal';
@@ -12,9 +12,9 @@ interface IProps {
     isVisible: boolean;
     isWinner?: boolean;
     lostTimes: number;
-    onFinishGame?: () => void;
-    onRevengeRequest?: () => void;
-    opponent?: IUser;
+    onFinishGame: () => void;
+    onRevengeRequest: (roomId: string) => void;
+    opponent?: IAwaitingUser;
     user: IUser;
     wonTimes: number;
 }
@@ -29,6 +29,11 @@ export const GameOverModal: React.FC<IProps> = ({
     user,
     wonTimes
 }) => {
+    const [isRevengeAvailable, setRevengeAvailabilty] = React.useState<boolean>(true);
+    const opponentBlockClassName =
+        ['game-over-modal__content__user', !isRevengeAvailable && 'game-over-modal__content__user--fade-out']
+            .filter(Boolean)
+            .join(' ');
     const { SUCCESS, DANGER, SECONDARY } = EViewType;
     const scoreView =
         wonTimes > lostTimes ?
@@ -36,6 +41,16 @@ export const GameOverModal: React.FC<IProps> = ({
         wonTimes < lostTimes ?
             DANGER :
             SECONDARY;
+
+    React.useEffect(
+        () => {
+            window.addEventListener(EEvents.OPPONENT_REVENGE_REFUSAL, () => {
+                setRevengeAvailabilty(false);
+            });
+        },
+        []
+    );
+
     return (
         <Modal isVisible={isVisible} onClose={onFinishGame} height="max-content">
             <div className="game-over-modal">
@@ -52,7 +67,7 @@ export const GameOverModal: React.FC<IProps> = ({
                     <div className={`game-over-modal__content__score game-over-modal__content__score--${scoreView}`}>
                         {wonTimes} - {lostTimes}
                     </div>
-                    <div className="game-over-modal__content__user">
+                    <div className={opponentBlockClassName}>
                         {opponent && (
                             <>
                                 <Avatar name={opponent.avatar} size={128} />
@@ -66,8 +81,9 @@ export const GameOverModal: React.FC<IProps> = ({
                 <div className="game-over-modal__actions">
                     <Button
                         block
-                        view={EViewType.PRIMARY}
-                        onClick={onRevengeRequest}
+                        view={isRevengeAvailable ? EViewType.PRIMARY : EViewType.SECONDARY}
+                        disabled={!isRevengeAvailable}
+                        onClick={() => onRevengeRequest(opponent?.roomId as any)}
                         size={EViewSize.MD}
                         width="45%"
                     >

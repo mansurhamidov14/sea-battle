@@ -27,7 +27,9 @@ io.on('connection', socket => {
 
     socket.on(EEvents.FINISH_BATTLE, (callback) => {
         const roomId = uuid();
-        const user = users.findById(socket.id)
+        const user = users.findById(socket.id);
+        const opponent = user?.roomId && users.getOpponent(socket.id, user?.roomId);
+        opponent && io.to(opponent.id).emit(EEvents.OPPONENT_REVENGE_REFUSAL);
 
         users.joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
         socket.leave(user?.roomId as any);
@@ -91,6 +93,11 @@ io.on('connection', socket => {
                 io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates, fireResult.isGameOver);
             }
         }
+    });
+
+    socket.on(EEvents.REVENGE_REQUESTED, (roomId: string) => {
+        const opponent = users.getOpponent(socket.id, roomId);
+        opponent && io.to(opponent.id).emit(EEvents.REVENGE_REQUESTED);
     });
 
     socket.on(EEvents.DISCONNECT, () => {
