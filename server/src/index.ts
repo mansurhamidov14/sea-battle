@@ -1,119 +1,94 @@
 import http from 'http';
 import socket from 'socket.io';
-import { uuid } from 'uuidv4';
 
 import { EEvents, EUserStatus } from './enums';
 import { fleets, ICoordinates } from './entities/fleet';
-import { users } from './entities/user';
+import { Game } from './entities/game';
 
 const server = http.createServer();
 const io = socket(server);
+const game = new Game(io);
 const PORT = process.env.PORT || 8080;
 
 io.on('connection', socket => {
-    console.log('New connection', socket.id);
-
     socket.on(EEvents.CREATE_USER, (user, callback) => {
-        const roomId = uuid();
-    
-        users
-            .create(user, socket.id)
-            .joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
-        socket.join(roomId);
-
         callback(socket.id);
-        io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
+        game.createPlayer(user, socket.id)
+            .broadcastAwaitingPlayers();
     });
 
     socket.on(EEvents.FINISH_BATTLE, (callback) => {
-        const roomId = uuid();
-        const user = users.findById(socket.id);
-        const opponent = user?.roomId && users.getOpponent(socket.id, user?.roomId);
-        opponent && io.to(opponent.id).emit(EEvents.OPPONENT_REVENGE_REFUSAL);
-
-        users.joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
-        socket.leave(user?.roomId as any);
-        socket.join(roomId);
-        io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
+        const opponent = game.findPlayerOpponent(socket.id);
+        game.setPlayerStatus(socket.id, EUserStatus.ONLINE)
+            .broadcastEvent(opponent.id, EEvents.OPPONENT_REVENGE_REFUSAL)
+            .broadcastAwaitingPlayers();
         callback();
     });
 
-    socket.on(EEvents.SEND_JOIN_REQUEST, (roomId) => {
-        const roomHost = users.getByRoom(roomId);
-        const user = users.findById(socket.id);
-        if (roomHost) {
-            io.to(roomHost.id).emit(EEvents.SEND_JOIN_REQUEST, user);
-        } else {
-            socket.join(roomId);
-            users.joinToRoom(socket.id, roomId);
-            io.to(socket.id).emit(EEvents.CREATE_ROOM, roomId);
+    socket.on(EEvents.SEND_INVITATION, (userId: string) => {
+        const opponent = game.findPlayerById(userId);
+        const user = game.findPlayerById(socket.id);
+        if (opponent) {
+            game.broadcastEvent(opponent.id, EEvents.SEND_INVITATION, user);
         }
     });
 
-    socket.on(EEvents.ACCEPT_JOIN_REQUEST, (userId: string) => {
-        const user = users.findById(userId);
-
-        if (user && user.roomId) {
-            socket.join(user.roomId);
-            users.joinToRoom(socket.id, user.roomId, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
-            users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
-            io.to(user.roomId).emit(EEvents.START_FLEETS_LOCATING);
+    socket.on(EEvents.ACCEPT_INVITATION, (userId: string) => {
+        const opponent = game.findPlayerById(userId);
+        if (opponent) {
+            game.connectPlayers(socket.id, userId)
+                .setPlayerStatus(socket.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS)
+                .setPlayerStatus(userId, EUserStatus.FLEET_LOCATING_IN_PROGRESS)
+                .broadcastEventToMultiplePlayers([socket.id, userId], EEvents.START_FLEETS_LOCATING);
         } else {
-            io.to(socket.id).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
+            game.broadcastEvent(socket.id, EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         }
     });
 
-    socket.on(EEvents.DECLINE_JOIN_REQUEST, (userId: string) => {
-        const user = users.findById(socket.id);
-        io.to(userId).emit(EEvents.DECLINE_JOIN_REQUEST, user);
+    socket.on(EEvents.DECLINE_INVITATION, (userId: string) => {
+        const user = game.findPlayerById(socket.id);
+        game.broadcastEvent(userId, EEvents.DECLINE_INVITATION, user);
     });
 
     socket.on(EEvents.COMPLETE_FLEETS_LOCATING, (userFleets, callback) => {
-        const roomId = users.findById(socket.id)?.roomId;
-        if (roomId) {
-            const opponent = users.getOpponent(socket.id, roomId);
+        const opponent = game.findPlayerOpponent(socket.id);
+        if (opponent) {
             fleets.setUserFleets(socket.id, userFleets);
             callback();
-            if (opponent?.status !== EUserStatus.FLEET_LOCATING_COMPLETED) {
-                users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_COMPLETED);
+            if (opponent.status !== EUserStatus.FLEET_LOCATING_COMPLETED) {
+                game.setPlayerStatus(socket.id, EUserStatus.FLEET_LOCATING_COMPLETED);
             } else {
-                users.startBattle(roomId);
-                io.to(roomId).emit(EEvents.START_GAME, opponent.id);
+                game.start(socket.id);
             }
+        } else {
+            game.broadcastEvent(socket.id, EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         }
     });
 
     socket.on(EEvents.FIRE, (coordinates: ICoordinates, callback) => {
-        const roomId = users.findById(socket.id)?.roomId;
-        if (roomId) {
-            const opponent = users.getOpponent(socket.id, roomId);
-            if (opponent) {
-                const fireResult = fleets.fire(coordinates, opponent.id);
-                callback(fireResult.firedFleetId, fireResult.wasDestroyed, fireResult.isGameOver);
-                io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates, fireResult.isGameOver);
-            }
+        const opponent = game.findPlayerOpponent(socket.id);
+        const { firedFleetId, wasDestroyed, isGameOver, fleets: fleetsList } = fleets.fire(coordinates, opponent.id);
+        callback(firedFleetId, wasDestroyed, isGameOver);
+        game.broadcastEvent(opponent.id, EEvents.FIRE, firedFleetId, fleetsList, coordinates, isGameOver);
+    });
+
+    socket.on(EEvents.REVENGE_REQUESTED, () => {
+        const opponent = game.findPlayerOpponent(socket.id);
+        if (opponent.status === EUserStatus.REQUESTED_REVENGE) {
+            game.broadcastEventToMultiplePlayers([socket.id, opponent.id], EEvents.START_FLEETS_LOCATING);
+        } else {
+            game.setPlayerStatus(socket.id, EUserStatus.REQUESTED_REVENGE);
+            opponent && game.broadcastEvent(opponent.id, EEvents.REVENGE_REQUESTED);
         }
     });
 
-    socket.on(EEvents.REVENGE_REQUESTED, (roomId: string) => {
-        const opponent = users.getOpponent(socket.id, roomId);
-        opponent && io.to(opponent.id).emit(EEvents.REVENGE_REQUESTED);
-    });
-
     socket.on(EEvents.DISCONNECT, () => {
-        const user = users.findById(socket.id);
-        if (
-            user?.status &&
-            [EUserStatus.FLEET_LOCATING_COMPLETED, EUserStatus.FLEET_LOCATING_IN_PROGRESS, EUserStatus.PLAYING]
-                .includes(user?.status) &&
-            user.roomId
-        ) {
-            io.to(user.roomId).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' })
+        const user = game.findPlayerById(socket.id);
+        if (user?.opponentId) {
+            game.broadcastEvent(user.opponentId, EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         } 
-        users.delete(socket.id);
+        game.deletePlayer(socket.id);
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});
+server.listen(PORT);
