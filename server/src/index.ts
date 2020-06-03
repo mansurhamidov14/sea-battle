@@ -11,8 +11,6 @@ const game = new Game(io);
 const PORT = process.env.PORT || 8080;
 
 io.on('connection', socket => {
-    console.log('New connection', socket.id);
-
     socket.on(EEvents.CREATE_USER, (user, callback) => {
         callback(socket.id);
         game.createPlayer(user, socket.id)
@@ -93,6 +91,4 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});
+server.listen(PORT);
