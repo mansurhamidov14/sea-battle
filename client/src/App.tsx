@@ -99,29 +99,25 @@ class App extends React.Component<{}, IAppState> {
     }
 
     getNotificationData (notification: INotification): IAlertProps {
-        const { DECLINED_INVITATION, RECEIVED_INVITATION, REVENGE_REQUESTED } = ENotificationType;
+        const { DECLINED_INVITATION } = ENotificationType;
+        const [handleAccept, handleClose] = this.getNotificationActionsCallback(notification)
         const { username, type } = notification
         return {
-            actions: type === RECEIVED_INVITATION || type === REVENGE_REQUESTED ? [
+            actions: handleAccept && handleClose ? [
                 {
                     label: 'Decline',
-                    onClick: () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
+                    onClick: handleClose
                 },
                 {
                     label: 'Accept',
-                    onClick: () => {
-                        this.reactToInvitation(notification.id as string, EEvents.ACCEPT_JOIN_REQUEST);
-                        this.setState({ opponent: notification });
-                    }
+                    onClick: handleAccept
                 }
             ] : undefined,
             avatarName: notification.avatar,
             message: this.getNotificationMessage(type, username),
             title: this.getNotificationTitle(type),
             view: type === DECLINED_INVITATION ? EViewType.DANGER : EViewType.SUCCESS,
-            onClose: type === DECLINED_INVITATION
-                ? () => this.removeNotification(notification)
-                : () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_JOIN_REQUEST)
+            onClose: handleClose
         }
     }
 
@@ -147,25 +143,46 @@ class App extends React.Component<{}, IAppState> {
         }
     }
 
+    getNotificationActionsCallback (notification: INotification): ((() => void) | undefined)[] {
+        let acceptCallback: (() => void) | undefined;
+        let closeCallback: (() => void) | undefined;
+        switch (notification.type) {
+            case ENotificationType.REVENGE_REQUESTED:
+                acceptCallback = () => this.requestRevenge();
+                closeCallback = () => this.finishBattle();
+                break;
+            case ENotificationType.RECEIVED_INVITATION:
+                acceptCallback = () => {
+                    this.reactToInvitation(notification.id as string, EEvents.ACCEPT_INVITATION);
+                    this.setState({ opponent: notification });
+                };
+                closeCallback = () => this.reactToInvitation(notification.id as string, EEvents.DECLINE_INVITATION);
+                break;
+            case ENotificationType.DECLINED_INVITATION:
+            default:
+        }
+        return [acceptCallback, closeCallback]
+    }
+
     removeNotification (notification: INotification) {
         this.setState(state => ({
             notifications: state.notifications.filter(({ id, type }) => !(notification.type === type && notification.id === id))
         }));
     }
 
-    reactToInvitation (userId: string, reaction: EEvents.ACCEPT_JOIN_REQUEST | EEvents.DECLINE_JOIN_REQUEST) {
+    reactToInvitation (userId: string, reaction: EEvents.ACCEPT_INVITATION | EEvents.DECLINE_INVITATION) {
         this.setState(state => ({
-            notifications: state.notifications.filter(({ id, type }) => !(id === userId && type === ENotificationType.RECEIVED_INVITATION || type === ENotificationType.REVENGE_REQUESTED))
+            notifications: state.notifications.filter(({ id, type }) => !(id === userId && (type === ENotificationType.RECEIVED_INVITATION || type === ENotificationType.REVENGE_REQUESTED))),
         }));
         this.socket.emit(reaction, userId);
     }
 
     invitePlayer (player: IAwaitingUser) {
-        this.socket.emit(EEvents.SEND_JOIN_REQUEST, player.roomId);
+        this.socket.emit(EEvents.SEND_INVITATION, player.id);
         this.setState(state => ({
             awaitingUsers: state.awaitingUsers.map(user => ({
                 ...user,
-                hasBeenInvited: user.roomId === player.roomId || user.hasBeenInvited
+                hasBeenInvited: user.id === player.id || user.hasBeenInvited
             })),
             opponent: player
         }));
@@ -241,8 +258,8 @@ class App extends React.Component<{}, IAppState> {
         });
     }
 
-    requestRevenge (roomId: string) {
-        this.socket.emit(EEvents.REVENGE_REQUESTED, roomId);
+    requestRevenge () {
+        this.socket.emit(EEvents.REVENGE_REQUESTED);
     }
 
     componentDidMount () {
@@ -252,7 +269,7 @@ class App extends React.Component<{}, IAppState> {
                 awaitingUsers: users.filter(({ id }) => id !== this.state.user.id)
             });
         });
-        this.socket.on(EEvents.SEND_JOIN_REQUEST, (invitation: IUser) => {
+        this.socket.on(EEvents.SEND_INVITATION, (invitation: IUser) => {
             this.setState(state => ({
                 notifications: [
                     ...state.notifications,
@@ -277,11 +294,11 @@ class App extends React.Component<{}, IAppState> {
                 }));
             }
         );
-        this.socket.on(EEvents.DECLINE_JOIN_REQUEST, (rejectedUser: IAwaitingUser) => {
+        this.socket.on(EEvents.DECLINE_INVITATION, (rejectedUser: IAwaitingUser) => {
             this.setState(state => ({
                 awaitingUsers: state.awaitingUsers.map(user => ({
                     ...user,
-                    hasBeenInvited: user.roomId === rejectedUser.roomId ? false : user.hasBeenInvited,
+                    hasBeenInvited: user.id === rejectedUser.id ? false : user.hasBeenInvited,
                 })),
                 notifications: [
                     ...state.notifications,

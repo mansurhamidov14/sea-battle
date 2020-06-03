@@ -14,101 +14,88 @@ io.on('connection', socket => {
     console.log('New connection', socket.id);
 
     socket.on(EEvents.CREATE_USER, (user, callback) => {
-        const roomId = uuid();
-    
-        users
-            .create(user, socket.id)
-            .joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
-        socket.join(roomId);
+        users.create(user, socket.id);
 
         callback(socket.id);
         io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
     });
 
     socket.on(EEvents.FINISH_BATTLE, (callback) => {
-        const roomId = uuid();
         const user = users.findById(socket.id);
-        const opponent = user?.roomId && users.getOpponent(socket.id, user?.roomId);
+        const opponent = user?.opponentId && users.getOpponent(socket.id);
         opponent && io.to(opponent.id).emit(EEvents.OPPONENT_REVENGE_REFUSAL);
 
-        users.joinToRoom(socket.id, roomId, EUserStatus.ONLINE);
-        socket.leave(user?.roomId as any);
-        socket.join(roomId);
         io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
         callback();
     });
 
-    socket.on(EEvents.SEND_JOIN_REQUEST, (roomId) => {
-        const roomHost = users.getByRoom(roomId);
+    socket.on(EEvents.SEND_INVITATION, (userId: string) => {
+        const opponent = users.findById(userId);
         const user = users.findById(socket.id);
-        if (roomHost) {
-            io.to(roomHost.id).emit(EEvents.SEND_JOIN_REQUEST, user);
-        } else {
-            socket.join(roomId);
-            users.joinToRoom(socket.id, roomId);
-            io.to(socket.id).emit(EEvents.CREATE_ROOM, roomId);
+        if (opponent) {
+            io.to(opponent.id).emit(EEvents.SEND_INVITATION, user);
         }
     });
 
-    socket.on(EEvents.ACCEPT_JOIN_REQUEST, (userId: string) => {
-        const user = users.findById(userId);
+    socket.on(EEvents.ACCEPT_INVITATION, (userId: string) => {
+        const user = users.findById(socket.id);
+        const opponent = users.findById(userId);
 
-        if (user && user.roomId) {
-            socket.join(user.roomId);
-            users.joinToRoom(socket.id, user.roomId, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
+        if (opponent && user) {
+            opponent.opponentId = user.id;
+            user.opponentId = opponent.id;
             users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
-            io.to(user.roomId).emit(EEvents.START_FLEETS_LOCATING);
+            io.to(user.id).emit(EEvents.START_FLEETS_LOCATING);
+            io.to(opponent.id).emit(EEvents.START_FLEETS_LOCATING);
         } else {
             io.to(socket.id).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' });
         }
     });
 
-    socket.on(EEvents.DECLINE_JOIN_REQUEST, (userId: string) => {
+    socket.on(EEvents.DECLINE_INVITATION, (userId: string) => {
         const user = users.findById(socket.id);
-        io.to(userId).emit(EEvents.DECLINE_JOIN_REQUEST, user);
+        io.to(userId).emit(EEvents.DECLINE_INVITATION, user);
     });
 
     socket.on(EEvents.COMPLETE_FLEETS_LOCATING, (userFleets, callback) => {
-        const roomId = users.findById(socket.id)?.roomId;
-        if (roomId) {
-            const opponent = users.getOpponent(socket.id, roomId);
+        const opponent = users.getOpponent(socket.id);
+        if (opponent) {
             fleets.setUserFleets(socket.id, userFleets);
             callback();
-            if (opponent?.status !== EUserStatus.FLEET_LOCATING_COMPLETED) {
+            if (opponent.status !== EUserStatus.FLEET_LOCATING_COMPLETED) {
                 users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_COMPLETED);
             } else {
-                users.startBattle(roomId);
-                io.to(roomId).emit(EEvents.START_GAME, opponent.id);
+                users.startBattle(socket.id);
+                io.to(socket.id).emit(EEvents.START_GAME, opponent.id);
+                io.to(opponent.id).emit(EEvents.START_GAME, opponent.id);
             }
         }
     });
 
     socket.on(EEvents.FIRE, (coordinates: ICoordinates, callback) => {
-        const roomId = users.findById(socket.id)?.roomId;
-        if (roomId) {
-            const opponent = users.getOpponent(socket.id, roomId);
-            if (opponent) {
-                const fireResult = fleets.fire(coordinates, opponent.id);
-                callback(fireResult.firedFleetId, fireResult.wasDestroyed, fireResult.isGameOver);
-                io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates, fireResult.isGameOver);
-            }
+        const opponent = users.getOpponent(socket.id);
+        if (opponent) {
+            const fireResult = fleets.fire(coordinates, opponent.id);
+            callback(fireResult.firedFleetId, fireResult.wasDestroyed, fireResult.isGameOver);
+            io.to(opponent.id).emit(EEvents.FIRE, fireResult.firedFleetId, fireResult.fleets, coordinates, fireResult.isGameOver);
         }
     });
 
-    socket.on(EEvents.REVENGE_REQUESTED, (roomId: string) => {
-        const opponent = users.getOpponent(socket.id, roomId);
-        opponent && io.to(opponent.id).emit(EEvents.REVENGE_REQUESTED);
+    socket.on(EEvents.REVENGE_REQUESTED, () => {
+        const opponent = users.getOpponent(socket.id);
+        if (opponent.status === EUserStatus.REQUESTED_REVENGE) {
+            io.to(socket.id).emit(EEvents.START_FLEETS_LOCATING);
+            io.to(opponent.id).emit(EEvents.START_FLEETS_LOCATING);
+        } else {
+            users.setStatus(socket.id, EUserStatus.REQUESTED_REVENGE);
+            opponent && io.to(opponent.id).emit(EEvents.REVENGE_REQUESTED);
+        }
     });
 
     socket.on(EEvents.DISCONNECT, () => {
         const user = users.findById(socket.id);
-        if (
-            user?.status &&
-            [EUserStatus.FLEET_LOCATING_COMPLETED, EUserStatus.FLEET_LOCATING_IN_PROGRESS, EUserStatus.PLAYING]
-                .includes(user?.status) &&
-            user.roomId
-        ) {
-            io.to(user.roomId).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' })
+        if (user?.opponentId) {
+            io.to(user.opponentId).emit(EEvents.NOTIFICATION, { type: 'opponent_left_the_room' })
         } 
         users.delete(socket.id);
     });

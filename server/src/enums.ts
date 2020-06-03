@@ -1,6 +1,6 @@
 export enum EEvents {
-    ACCEPT_JOIN_REQUEST = 'accept_join_request',
-    DECLINE_JOIN_REQUEST = 'decline_join_request',
+    ACCEPT_INVITATION = 'accept_invitation',
+    DECLINE_INVITATION = 'decline_invitation',
     REVENGE_REQUESTED = 'revenge_requested',
     OPPONENT_REVENGE_REFUSAL = 'opponent_revenge_refusal',
     COMPLETE_FLEETS_LOCATING = 'complete_fleets_locating',
@@ -11,7 +11,7 @@ export enum EEvents {
     FIRE = 'fire',
     MESSAGE = 'message',
     NOTIFICATION = 'notification',
-    SEND_JOIN_REQUEST = 'send_join_request',
+    SEND_INVITATION = 'send_invitation',
     START_GAME = 'start_game',
     START_FLEETS_LOCATING = 'start_fleets_locating',
     GET_AWAITING_USERS_LIST = 'get_awaiting_users_list'
@@ -20,7 +20,7 @@ export enum EEvents {
 export enum EUserStatus {
     ONLINE = 'ONLINE',
     WAITING_FOR_OPPONENT = 'WAITING_FOR_OPPONENT',
-    REQUESTING_TO_JOIN_ROOM = 'REQUESTING_TO_JOIN_ROOM',
+    REQUESTED_REVENGE = 'REQUESTED_REVENGE',
     FLEET_LOCATING_COMPLETED = 'FLEET_LOCATING_COMPLETED',
     FLEET_LOCATING_IN_PROGRESS = 'FLEET_LOCATING_IN_PROGRESS',
     PLAYING = 'PLAYING',

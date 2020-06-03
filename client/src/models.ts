@@ -35,7 +35,6 @@ export interface IUser {
 
 export interface IAwaitingUser extends IUser {
     hasBeenInvited?: boolean;
-    roomId: string;
 }
 
 export interface INotification extends IUser {

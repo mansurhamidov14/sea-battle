@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { EViewType, EViewSize, EEvents } from '../../enums';
-import { IUser, IAwaitingUser } from '../../models';
+import { IUser } from '../../models';
 import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { Modal } from '../Modal';
@@ -13,8 +13,8 @@ interface IProps {
     isWinner?: boolean;
     lostTimes: number;
     onFinishGame: () => void;
-    onRevengeRequest: (roomId: string) => void;
-    opponent?: IAwaitingUser;
+    onRevengeRequest: () => void;
+    opponent: IUser;
     user: IUser;
     wonTimes: number;
 }
@@ -83,7 +83,7 @@ export const GameOverModal: React.FC<IProps> = ({
                         block
                         view={isRevengeAvailable ? EViewType.PRIMARY : EViewType.SECONDARY}
                         disabled={!isRevengeAvailable}
-                        onClick={() => onRevengeRequest(opponent?.roomId as any)}
+                        onClick={onRevengeRequest}
                         size={EViewSize.MD}
                         width="45%"
                     >
