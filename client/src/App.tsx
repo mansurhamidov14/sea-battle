@@ -148,8 +148,7 @@ class App extends React.Component<{}, IAppState> {
         let closeCallback: (() => void) | undefined;
         switch (notification.type) {
             case ENotificationType.REVENGE_REQUESTED:
-                acceptCallback = () => this.requestRevenge();
-                closeCallback = () => this.finishBattle();
+                closeCallback = () => this.setState(state => ({ notifications: state.notifications.filter(({ id, type }) => type !== notification.type && id !== notification.id) }));
                 break;
             case ENotificationType.RECEIVED_INVITATION:
                 acceptCallback = () => {

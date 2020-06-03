@@ -49,8 +49,8 @@ class Users implements IUsers {
 
     public startBattle (userId: string) {
         const opponentId = this.list[userId].opponentId as string;
-        this.list[userId].status = EUserStatus.ONLINE;
-        this.list[opponentId].status = EUserStatus.ONLINE;
+        this.list[userId].status = EUserStatus.PLAYING;
+        this.list[opponentId].status = EUserStatus.PLAYING;
         return this;
     }
 

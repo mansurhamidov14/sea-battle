@@ -1,6 +1,5 @@
 import http from 'http';
 import socket from 'socket.io';
-import { uuid } from 'uuidv4';
 
 import { EEvents, EUserStatus } from './enums';
 import { fleets, ICoordinates } from './entities/fleet';
@@ -21,9 +20,9 @@ io.on('connection', socket => {
     });
 
     socket.on(EEvents.FINISH_BATTLE, (callback) => {
-        const user = users.findById(socket.id);
-        const opponent = user?.opponentId && users.getOpponent(socket.id);
-        opponent && io.to(opponent.id).emit(EEvents.OPPONENT_REVENGE_REFUSAL);
+        const opponent = users.getOpponent(socket.id);
+        users.setStatus(socket.id, EUserStatus.ONLINE);
+        io.to(opponent.id).emit(EEvents.OPPONENT_REVENGE_REFUSAL);
 
         io.emit(EEvents.GET_AWAITING_USERS_LIST, users.getAwaitingUsers());
         callback();
@@ -45,6 +44,7 @@ io.on('connection', socket => {
             opponent.opponentId = user.id;
             user.opponentId = opponent.id;
             users.setStatus(socket.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
+            users.setStatus(opponent.id, EUserStatus.FLEET_LOCATING_IN_PROGRESS);
             io.to(user.id).emit(EEvents.START_FLEETS_LOCATING);
             io.to(opponent.id).emit(EEvents.START_FLEETS_LOCATING);
         } else {
