@@ -51,6 +51,13 @@ export const GameOverModal: React.FC<IProps> = ({
         []
     );
 
+    React.useEffect(
+        () => {
+            setRevengeAvailabilty(true);
+        },
+        [opponent]
+    )
+
     return (
         <Modal isVisible={isVisible} onClose={onFinishGame} height="max-content">
             <div className="game-over-modal">
