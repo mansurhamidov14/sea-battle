@@ -1,34 +1,23 @@
 import React from 'react';
 
 import { EViewType, EViewSize, EEvents } from '../../enums';
-import { IUser } from '../../models';
+import { useGameplay, usePlayer } from '../../hooks';
 import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { Modal } from '../Modal';
 
 import './styles.scss';
 
-interface IProps {
-    isVisible: boolean;
-    isWinner?: boolean;
-    lostTimes: number;
-    onFinishGame: () => void;
-    onRevengeRequest: () => void;
-    opponent: IUser;
-    user: IUser;
-    wonTimes: number;
-}
-
-export const GameOverModal: React.FC<IProps> = ({
-    isVisible,
-    isWinner,
-    lostTimes,
-    onFinishGame,
-    onRevengeRequest,
-    opponent,
-    user,
-    wonTimes
-}) => {
+export const GameOverModal: React.FC = () => {
+    const { player } = usePlayer();
+    const {
+        isGameOver,
+        isWinner,
+        score: { won, lost },
+        requestRevenge,
+        finishBattle,
+        opponent
+    } = useGameplay();
     const [isRevengeAvailable, setRevengeAvailabilty] = React.useState<boolean>(true);
     const opponentBlockClassName =
         ['game-over-modal__content__user', !isRevengeAvailable && 'game-over-modal__content__user--fade-out']
@@ -36,9 +25,9 @@ export const GameOverModal: React.FC<IProps> = ({
             .join(' ');
     const { SUCCESS, DANGER, SECONDARY } = EViewType;
     const scoreView =
-        wonTimes > lostTimes ?
+        won > lost ?
             SUCCESS :
-        wonTimes < lostTimes ?
+        won < lost ?
             DANGER :
             SECONDARY;
 
@@ -59,20 +48,20 @@ export const GameOverModal: React.FC<IProps> = ({
     )
 
     return (
-        <Modal isVisible={isVisible} onClose={onFinishGame} height="max-content">
+        <Modal isVisible={isGameOver} onClose={finishBattle} height="max-content">
             <div className="game-over-modal">
                 <div className={`game-over-modal__result game-over-modal__result--${isWinner ? 'winner' : 'loser'}`}>
                     {isWinner ? 'VICTORY!' : 'DEFEAT'}
                 </div>
                 <div className="game-over-modal__content">
                     <div className="game-over-modal__content__user">
-                        <Avatar name={user.avatar} size={128} />
+                        <Avatar name={player.avatar} size={128} />
                         <div className="game-over-modal__content__user__name">
-                            {user.username}
+                            {player.username}
                         </div>
                     </div>
                     <div className={`game-over-modal__content__score game-over-modal__content__score--${scoreView}`}>
-                        {wonTimes} - {lostTimes}
+                        {won} - {lost}
                     </div>
                     <div className={opponentBlockClassName}>
                         {opponent && (
@@ -90,7 +79,7 @@ export const GameOverModal: React.FC<IProps> = ({
                         block
                         view={isRevengeAvailable ? EViewType.PRIMARY : EViewType.SECONDARY}
                         disabled={!isRevengeAvailable}
-                        onClick={onRevengeRequest}
+                        onClick={requestRevenge}
                         size={EViewSize.MD}
                         width="45%"
                     >
@@ -99,7 +88,7 @@ export const GameOverModal: React.FC<IProps> = ({
                     <Button
                         block
                         view={EViewType.DANGER}
-                        onClick={onFinishGame}
+                        onClick={finishBattle}
                         size={EViewSize.MD}
                         width="45%"
                     >
