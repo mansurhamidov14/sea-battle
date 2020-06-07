@@ -6,15 +6,15 @@ import { PlayerProvider } from './Player';
 import { SocketProvider } from './Socket';
 
 export const Provider: React.FC = ({ children }) => (
-    <PlayerProvider>
+    <SocketProvider>
         <GameplayProvider>
             <NotificationsProvider>
-                <SocketProvider>
+                <PlayerProvider>
                     {children}
-                </SocketProvider>
+                </PlayerProvider>
             </NotificationsProvider>
         </GameplayProvider>
-    </PlayerProvider>
+    </SocketProvider>
 );
 
 Provider.displayName = 'Provider';

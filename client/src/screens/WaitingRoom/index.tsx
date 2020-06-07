@@ -1,13 +1,21 @@
 import React from 'react';
 
 import { Avatar, Button, Sea } from '../../components';
-import { EViewType, EViewSize } from '../../enums';
-import { useGameplay } from '../../hooks';
+import { EViewType, EViewSize, EEvents } from '../../enums';
+import { useGameplay, useSocket } from '../../hooks';
+import { IAwaitingUser } from '../../models';
 
 import './styles.scss';
 
 export const WaitingRoomScreen: React.FC = () => {
-    const { awaitingUsers, toggleUserInvited } = useGameplay();
+    const socket = useSocket();
+    const { awaitingUsers, toggleUserInvited, setOpponent } = useGameplay();
+
+    const invitePlayer = (player: IAwaitingUser) => {
+        socket.emit(EEvents.SEND_INVITATION, player.id);
+        toggleUserInvited(player.id, true);
+        setOpponent(player);
+    };
 
     return (
         <Sea>
@@ -21,7 +29,7 @@ export const WaitingRoomScreen: React.FC = () => {
                             <Avatar size={96} name={user.avatar} />
                             <Button
                                 disabled={user.hasBeenInvited}
-                                onClick={() => toggleUserInvited(user.id, true)}
+                                onClick={() => invitePlayer(user)}
                                 view={user.hasBeenInvited ? EViewType.SECONDARY : EViewType.PRIMARY}
                                 size={EViewSize.SM}
                             >

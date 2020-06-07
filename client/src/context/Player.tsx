@@ -26,7 +26,7 @@ export const PlayerProvider: React.FC = ({
     const { setUserStatus } = useGameplay();
     const [player, setPlayerData] = React.useState<IUser>(initialPlayerData);
     const createPlayer = () => {
-        socket.emit(EEvents.CREATE_USER, (userId: string) => {
+        socket.emit(EEvents.CREATE_USER, player, (userId: string) => {
             setPlayerData(state => ({ ...state, id: userId }));
             setUserStatus(EUserStatus.ONLINE);
         });

@@ -50,7 +50,6 @@ export interface IGameplayContext {
     submitPlayerFleets: (fleets: IFleet[]) => void;
     setUserStatus: (status: EUserStatus) => void;
     startNewGame: () => void;
-    startRevengeBattle: () => void;
 }
 
 export const GameplayContext = React.createContext<IGameplayContext>({
@@ -76,7 +75,6 @@ export const GameplayContext = React.createContext<IGameplayContext>({
     requestRevenge: null as any,
     setUserStatus: null as any,
     startNewGame: null as any,
-    startRevengeBattle: null as any,
     setPlayerFleets: null as any,
     submitPlayerFleets: null as any
 });
@@ -107,41 +105,13 @@ export const GameplayProvider: React.FC = ({
                     };
                 }
                 return _player
-            })
+            });
         }); 
     };
 
     const setOpponent = (player: IUser) => setOpponentData(player);
 
     const toggleFiring = (isFiring: boolean) => setPlayingMode(isFiring ? EPlayingMode.FIRING : EPlayingMode.WATCHING);
-
-    const getFireResultByPlayer = (
-        coordinates: ICoordinates,
-        firedFleetId: number | null,
-        wasDestroyed: boolean,
-        gameOver: boolean
-    ) => {
-        toggleFiring(Boolean(firedFleetId));
-        if (firedFleetId) {
-            setFiredOpponentFleets(state => state.map(
-                fleet => {
-                    if (fleet.id === firedFleetId) {
-                        return {
-                            ...fleet,
-                            wasDestroyed,
-                            coordinates: [...fleet.coordinates, coordinates]
-                        };
-                    }
-                    return fleet;
-                }
-            ));
-            setGameOver(gameOver);
-            setWinning(gameOver || undefined);
-            setScore(state => ({ ...state, won: state.won + Number(gameOver) }));
-        } else {
-            setFiredCoordinatesOfOpponent(state => [...state, coordinates]);
-        }
-    };
 
     const getFireResultByOpponent = (
         firedFleetId: number | null,
@@ -152,6 +122,7 @@ export const GameplayProvider: React.FC = ({
         toggleFiring(!firedFleetId);
         setPlayerFleets(state => firedFleetId ? updatedFleets : state);
         setWinning(gameOver ? false : undefined);
+        setGameOver(gameOver);
         setScore(state => ({ ...state, lost: state.lost + Number(gameOver) }));
         if (!firedFleetId) {
             setFiredCoordinatesOfPlayer(state => [...state, coordinates]);
@@ -159,7 +130,39 @@ export const GameplayProvider: React.FC = ({
     };
 
     const fireOpponent = (V: number, H: number) => {
-        socket.emit(EEvents.FIRE, { V, H }, getFireResultByPlayer);
+        socket.emit(EEvents.FIRE, { V, H }, (firedFleetId: number | null, wasDestroyed: boolean, gameOver: boolean) => {
+            toggleFiring(Boolean(firedFleetId));
+            if (firedFleetId) {
+                setFiredOpponentFleets(state => {
+                    if (state.some(fleet => fleet.id === firedFleetId)) {
+                        return state.map(fleet => {
+                            if (fleet.id === firedFleetId) {
+                                return {
+                                    ...fleet,
+                                    wasDestroyed,
+                                    coordinates: [...fleet.coordinates, { V, H }]
+                                };
+                            }
+                            return fleet;
+                        });
+                    } else {
+                        return [
+                            ...state,
+                            {
+                                id: firedFleetId,
+                                wasDestroyed,
+                                coordinates: [{ V, H }]
+                            }
+                        ];
+                    }
+                });
+                setGameOver(gameOver);
+                setWinning(gameOver || undefined);
+                setScore(state => ({ ...state, won: state.won + Number(gameOver) }));
+            } else {
+                setFiredCoordinatesOfOpponent(state => [...state, { V, H }]);
+            }
+        });
     } 
 
     const submitPlayerFleets = (fleets: IFleet[]) => {
@@ -175,14 +178,7 @@ export const GameplayProvider: React.FC = ({
         setUserStatus(EUserStatus.FLEET_LOCATING_IN_PROGRESS);
         setPlayerFleets(initialPlayerFleets);
         setFiredOpponentFleets(initialOpponentFleets);
-    };
-
-    const startRevengeBattle = () => {
-        setFiredCoordinatesOfOpponent(initialFiredCoordinates);
-        setFiredCoordinatesOfPlayer(initialFiredCoordinates);
-        setUserStatus(EUserStatus.FLEET_LOCATING_IN_PROGRESS);
-        setPlayerFleets(initialPlayerFleets);
-        setFiredOpponentFleets(initialOpponentFleets);
+        setGameOver(false);
     };
 
     const finishBattle = () => {
@@ -217,7 +213,6 @@ export const GameplayProvider: React.FC = ({
             requestRevenge,
             setUserStatus,
             startNewGame,
-            startRevengeBattle,
             setPlayerFleets,
             opponent,
             finishBattle,
