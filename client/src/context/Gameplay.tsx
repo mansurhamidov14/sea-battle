@@ -52,32 +52,7 @@ export interface IGameplayContext {
     startNewGame: () => void;
 }
 
-export const GameplayContext = React.createContext<IGameplayContext>({
-    awaitingUsers: null as any,
-    firedCoordinatesOfOpponent: null as any,
-    firedCoordinatesOfPlayer: null as any,
-    playerFleets: null as any,
-    isGameOver: null as any,
-    isWinner: null as any,
-    opponentFleets: null as any,
-    userStatus: null as any,
-    playingMode: null as any,
-    score: null as any,
-
-    /** methods */
-    setAwaitingUsers: null as any,
-    toggleUserInvited: null as any,
-    fireOpponent: null as any,
-    finishBattle: null as any,
-    getFireResultByOpponent: null as any,
-    setOpponent: null as any,
-    toggleFiring: null as any,
-    requestRevenge: null as any,
-    setUserStatus: null as any,
-    startNewGame: null as any,
-    setPlayerFleets: null as any,
-    submitPlayerFleets: null as any
-});
+export const GameplayContext = React.createContext<IGameplayContext>(null as any);
 
 export const GameplayProvider: React.FC = ({
     children

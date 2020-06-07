@@ -9,10 +9,7 @@ export interface INotificationsContext {
     pushNotification: (notification: INotification) => void;
 }
 
-export const NotificationsContext = React.createContext<INotificationsContext>({
-    notifications: null as any,
-    pushNotification: null as any
-});
+export const NotificationsContext = React.createContext<INotificationsContext>(null as any);
 
 export const NotificationsProvider: React.FC = ({ children }) => {
     const [notifications, setNotifications] = React.useState<INotification[]>([]);

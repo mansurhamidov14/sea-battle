@@ -12,12 +12,7 @@ export interface IPlayerContext {
     createPlayer: () => void;
 }
 
-export const PlayerContext = React.createContext<IPlayerContext>({
-    player: null as any,
-    setPlayerAvatar: null as any,
-    setPlayerName: null as any,
-    createPlayer: null as any
-});
+export const PlayerContext = React.createContext<IPlayerContext>(null as any);
 
 export const PlayerProvider: React.FC = ({
     children
