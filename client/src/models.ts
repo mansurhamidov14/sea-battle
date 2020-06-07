@@ -1,6 +1,6 @@
 import {
     EAvatarName,
-    ENotificationType
+    EViewType
 } from './enums';
 
 export interface ICoordinates {
@@ -34,9 +34,25 @@ export interface IUser {
 }
 
 export interface IAwaitingUser extends IUser {
+    id: string;
     hasBeenInvited?: boolean;
 }
 
-export interface INotification extends IUser {
-    type: ENotificationType
+export interface INotification {
+    id?: string;
+    view: EViewType;
+    title: string;
+    message: string;
+    accept?: INotificationAction;
+    decline?: INotificationAction;
+}
+
+export interface INotificationAction {
+    label: string;
+    onClick: () => void;
+}
+
+export interface IScore {
+    won: number;
+    lost: number;
 }

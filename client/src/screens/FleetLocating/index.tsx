@@ -1,11 +1,6 @@
 import React from 'react';
 
-import {
-    Button,
-    Fleet,
-    GameGrid,
-    Sea,
-} from '../../components';
+import { Button, Fleet, GameGrid, Sea } from '../../components';
 import { EGameEvents, EViewType } from '../../enums';
 import { IFleet, IMovableFleet } from '../../models';
 import { FleetService, IFleetService } from '../../services/Fleet';

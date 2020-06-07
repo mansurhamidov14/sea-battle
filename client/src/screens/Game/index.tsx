@@ -1,33 +1,24 @@
 import React from 'react';
 
-import {
-    Sea, GameGrid, Fleet, OpponentFleet
-} from '../../components';
+import { Fleet, GameGrid, OpponentFleet, Sea } from '../../components';
 import { EPlayingMode } from '../../enums';
-import { IFleet, IOpponentFleet, ICoordinates } from '../../models';
+import { useGameplay } from '../../hooks';
 
-interface IProps {
-    firedCoordinatesOfOpponent: ICoordinates[];
-    firedCoordinatesOfUser: ICoordinates[];
-    onFire: (V: number, H: number) => void;
-    opponentFleets: IOpponentFleet[];
-    playingMode: EPlayingMode
-    userFleets: IFleet[];
-}
+export const GameScreen: React.FC = () => {
+    const {
+        playerFleets,
+        opponentFleets,
+        fireOpponent,
+        playingMode,
+        firedCoordinatesOfOpponent,
+        firedCoordinatesOfPlayer
+    } = useGameplay();
 
-export const GameScreen: React.FC<IProps> = ({
-    firedCoordinatesOfOpponent,
-    firedCoordinatesOfUser,
-    onFire,
-    opponentFleets,
-    playingMode,
-    userFleets
-}) => {
     if (playingMode === EPlayingMode.WATCHING) {
         return (
             <Sea>
-                <GameGrid firedCoordinates={firedCoordinatesOfUser}>
-                    {userFleets.map(fleet => (
+                <GameGrid firedCoordinates={firedCoordinatesOfPlayer}>
+                    {playerFleets.map(fleet => (
                         <Fleet key={fleet.id} coordinates={fleet.coordinates} />
                     ))}
                 </GameGrid>
@@ -37,7 +28,7 @@ export const GameScreen: React.FC<IProps> = ({
         return (
             <GameGrid
                 blackBordered
-                onClickItem={onFire}
+                onClickItem={fireOpponent}
                 firedCoordinates={firedCoordinatesOfOpponent}
             >
                 {opponentFleets.map(fleet => (

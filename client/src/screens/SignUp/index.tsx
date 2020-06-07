@@ -1,37 +1,32 @@
 import React from 'react';
 
-import { Avatar, Sea, Button } from '../../components';
-import { EAvatarName, EViewType } from '../../enums';
-import { IUser } from '../../models';
 import { assets } from '../../assets';
+import { Avatar, Button, Sea } from '../../components';
+import { EViewType } from '../../enums';
+import { usePlayer } from '../../hooks';
 
 import './styles.scss';
 
-interface IProps extends IUser {
-    onChangeUsername: (value: string) => void;
-    onSelectAvatar: (avatar: EAvatarName) => void;
-    onStartGame: () => void;
-}
+export const SignUpScreen: React.FC = () => {
+    const {
+        createPlayer,
+        player,
+        setPlayerAvatar,
+        setPlayerName,
+    } = usePlayer();
 
-export const SignUpScreen: React.FC<IProps> = ({
-    avatar,
-    onChangeUsername,
-    onSelectAvatar,
-    onStartGame,
-    username
-}) => {
     return (
         <Sea>
             <div className="user">
                 <div className="user__avatar">
-                    <Avatar size={128} name={avatar} />
+                    <Avatar size={128} name={player.avatar} />
                 </div>
                 <div className="user__name">
                     <input
                         type="text"
-                        value={username}
+                        value={player.username}
                         placeholder="Enter username"
-                        onChange={e => onChangeUsername(e.target.value)}
+                        onChange={e => setPlayerName(e.target.value)}
                     />
                 </div>
                 <div className="user__avatars-list">
@@ -39,17 +34,17 @@ export const SignUpScreen: React.FC<IProps> = ({
                         <div key={avatarName} className="user__avatars-list__item">
                             <Avatar
                                 name={avatarName as any}
-                                selected={avatarName === avatar}
+                                selected={avatarName === player.avatar}
                                 size={96}
-                                onClick={() => onSelectAvatar(avatarName as any)}
+                                onClick={() => setPlayerAvatar(avatarName as any)}
                             />
                         </div>
                     ))}
                 </div>
                 <Button
                     block
-                    disabled={!username.length}
-                    onClick={onStartGame}
+                    disabled={!player.username}
+                    onClick={createPlayer}
                     view={EViewType.SUCCESS}
                     width="70%"
                 >
