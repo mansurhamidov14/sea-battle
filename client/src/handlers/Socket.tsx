@@ -42,15 +42,8 @@ class SocketHandlerDumb extends React.Component<IProps> {
             startNewGame,
             toggleFiring,
         } = this.props;
-        socket.off(EEvents.GET_AWAITING_USERS_LIST);
-        socket.off(EEvents.REVENGE_REQUESTED);
-        socket.off(EEvents.SEND_INVITATION);
-        socket.off(EEvents.DECLINE_INVITATION);
-        socket.off(EEvents.REVENGE_REQUESTED);
-        socket.off(EEvents.FIRE);
-        socket.off(EEvents.START_FLEETS_LOCATING);
-        socket.off(EEvents.START_GAME);
-        socket.off(EEvents.OPPONENT_REVENGE_REFUSAL);
+
+        Object.values(EEvents).forEach((event) => socket.off(event));
 
         socket.on(EEvents.GET_AWAITING_USERS_LIST, (players: IAwaitingUser[]) => {
             setAwaitingUsers(players.filter(({ id }) => id !== player.id));
