@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 
-import { IFleet } from '../models';
 import { EMovingDirection } from '../enums';
+import { IFleet } from '../models';
 
 export interface IFleetService {
     generateFleet: (locatedCount?: number) => IFleet;

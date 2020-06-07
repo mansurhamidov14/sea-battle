@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { EEvents, EViewType, EUserStatus  } from '../enums';
+import { EEvents, EViewType, EUserStatus } from '../enums';
 import {
     useGameplay,
     useNotifications,
@@ -107,7 +107,7 @@ class SocketHandlerDumb extends React.Component<IProps> {
             <React.Fragment>
                 {this.props.children}
             </React.Fragment>
-        )
+        );
     }
 }
 

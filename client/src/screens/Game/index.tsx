@@ -1,11 +1,6 @@
 import React from 'react';
 
-import {
-    Fleet,
-    GameGrid,
-    OpponentFleet,
-    Sea,
-} from '../../components';
+import { Fleet, GameGrid, OpponentFleet, Sea } from '../../components';
 import { EPlayingMode } from '../../enums';
 import { useGameplay } from '../../hooks';
 

@@ -4,40 +4,32 @@ import { Layout, GameOverModal } from './components';
 import { EUserStatus } from './enums';
 import { SocketHandler } from './handlers/Socket';
 import { useGameplay } from './hooks';
-import { IControlService, ControlService } from './services/Control';
+import { ControlService, IControlService } from './services/Control';
 import {
     FleetLocatingScreen,
-    WaitingRoomScreen,
     GameScreen,
-    SignUpScreen
+    SignUpScreen,
+    WaitingRoomScreen,
 } from './screens';
 
 const App: React.FC = () => {
     const { userStatus, submitPlayerFleets } = useGameplay();
     const [controlService] = React.useState<IControlService>(new ControlService());
+    const { FLEET_LOCATING_COMPLETED, FLEET_LOCATING_IN_PROGRESS, ONLINE, PLAYING, UNREGISTERED } = EUserStatus;
     controlService.init();
 
     return (
         <SocketHandler>
             <Layout>
-                {EUserStatus.ONLINE === userStatus && (
-                    <WaitingRoomScreen />
-                )}
-                {(
-                    EUserStatus.FLEET_LOCATING_IN_PROGRESS === userStatus ||
-                    EUserStatus.FLEET_LOCATING_COMPLETED === userStatus
-                ) && (
+                {ONLINE === userStatus && <WaitingRoomScreen />}
+                {[FLEET_LOCATING_IN_PROGRESS, FLEET_LOCATING_COMPLETED].includes(userStatus) && (
                     <FleetLocatingScreen
                         onSubmit={submitPlayerFleets}
                         submitted={userStatus === EUserStatus.FLEET_LOCATING_COMPLETED}
                     />
                 )}
-                {(EUserStatus.UNREGISTERED === userStatus) && (
-                    <SignUpScreen />
-                )}
-                {EUserStatus.PLAYING === userStatus && (
-                    <GameScreen />
-                )}
+                {UNREGISTERED === userStatus && <SignUpScreen />}
+                {PLAYING === userStatus && <GameScreen />}
                 <GameOverModal />
             </Layout>
         </SocketHandler>

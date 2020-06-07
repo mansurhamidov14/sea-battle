@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { assets } from '../../assets';
-import { Avatar, Sea, Button } from '../../components';
+import { Avatar, Button, Sea } from '../../components';
 import { EViewType } from '../../enums';
 import { usePlayer } from '../../hooks';
 
@@ -9,10 +9,10 @@ import './styles.scss';
 
 export const SignUpScreen: React.FC = () => {
     const {
+        createPlayer,
         player,
         setPlayerAvatar,
         setPlayerName,
-        createPlayer
     } = usePlayer();
 
     return (

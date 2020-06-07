@@ -1,8 +1,8 @@
 import React from 'react';
 import { uuid } from 'uuidv4';
 
-import { INotification, INotificationAction } from '../models';
 import { Alert } from '../components';
+import { INotification, INotificationAction } from '../models';
 
 export interface INotificationsContext {
     notifications: INotification[];

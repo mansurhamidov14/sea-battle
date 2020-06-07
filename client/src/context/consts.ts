@@ -1,4 +1,4 @@
-import { EUserStatus, EAvatarName } from '../enums';
+import { EAvatarName, EUserStatus } from '../enums';
 
 import { IGameplayContext } from './Gameplay';
 import { IPlayerContext } from './Player';

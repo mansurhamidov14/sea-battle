@@ -7,9 +7,9 @@ import { initialPlayerData } from './consts';
 
 export interface IPlayerContext {
     player: IUser;
+    createPlayer: () => void;
     setPlayerAvatar: (avatar: EAvatarName) => void;
     setPlayerName: (username: string) => void;
-    createPlayer: () => void;
 }
 
 export const PlayerContext = React.createContext<IPlayerContext>(null as any);
@@ -20,6 +20,7 @@ export const PlayerProvider: React.FC = ({
     const socket = useSocket();
     const { setUserStatus } = useGameplay();
     const [player, setPlayerData] = React.useState<IUser>(initialPlayerData);
+
     const createPlayer = () => {
         socket.emit(EEvents.CREATE_USER, player, (userId: string) => {
             setPlayerData(state => ({ ...state, id: userId }));
@@ -32,10 +33,10 @@ export const PlayerProvider: React.FC = ({
 
     return (
         <PlayerContext.Provider value={{
+            createPlayer,
             player,
             setPlayerAvatar,
             setPlayerName,
-            createPlayer
         }}>
             {children}
         </PlayerContext.Provider>

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Avatar, Button, Sea } from '../../components';
-import { EViewType, EViewSize, EEvents } from '../../enums';
+import { EEvents, EViewType, EViewSize } from '../../enums';
 import { useGameplay, useSocket } from '../../hooks';
 import { IAwaitingUser } from '../../models';
 

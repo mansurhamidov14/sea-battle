@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { useSocket } from '../hooks';
 import {
     EEvents,
     EPlayingMode,
     EUserStatus,
 } from '../enums';
+import { useSocket } from '../hooks';
 import {
     IAwaitingUser,
     ICoordinates,
@@ -28,28 +28,26 @@ export interface IGameplayContext {
     awaitingUsers: IAwaitingUser[];
     firedCoordinatesOfOpponent: ICoordinates[];
     firedCoordinatesOfPlayer: ICoordinates[];
-    playerFleets: IFleet[];
     isGameOver: boolean;
     isWinner?: boolean;
     opponent?: IUser;
     opponentFleets: IOpponentFleet[];
-    userStatus: EUserStatus;
+    playerFleets: IFleet[];
     playingMode?: EPlayingMode;
     score: IScore;
-    
-    /** methods */
-    setAwaitingUsers: (users: IAwaitingUser[]) => void;
-    toggleUserInvited: (userId: string, invited: boolean) => void;
-    fireOpponent: (V: number, H: number) => void;
+    userStatus: EUserStatus;
     finishBattle: () => void;
+    fireOpponent: (V: number, H: number) => void;
     getFireResultByOpponent: (firedFleetId: number | null, fleets: IFleet[], coordinates: ICoordinates, gameOver: boolean) => void;
-    toggleFiring: (isFiring: boolean) => void;
-    setOpponent: (player: IUser) => void;
     requestRevenge: () => void;
+    setAwaitingUsers: (users: IAwaitingUser[]) => void;
+    setOpponent: (player: IUser) => void;
     setPlayerFleets: (fleets: IFleet[]) => void;
-    submitPlayerFleets: (fleets: IFleet[]) => void;
     setUserStatus: (status: EUserStatus) => void;
     startNewGame: () => void;
+    submitPlayerFleets: (fleets: IFleet[]) => void;
+    toggleFiring: (isFiring: boolean) => void;
+    toggleUserInvited: (userId: string, invited: boolean) => void;
 }
 
 export const GameplayContext = React.createContext<IGameplayContext>(null as any);
@@ -171,28 +169,28 @@ export const GameplayProvider: React.FC = ({
     return (
         <GameplayContext.Provider value={{
             awaitingUsers,
-            score,
-            opponentFleets,
-            setAwaitingUsers,
-            toggleUserInvited,
+            finishBattle,
             firedCoordinatesOfOpponent,
+            firedCoordinatesOfPlayer,
             fireOpponent,
             getFireResultByOpponent,
-            toggleFiring,
-            playingMode,
             isGameOver,
             isWinner,
+            opponent,
+            opponentFleets,
+            setAwaitingUsers,
+            score,
             playerFleets,
-            firedCoordinatesOfPlayer,
-            userStatus,
+            playingMode,
             requestRevenge,
+            toggleFiring,
+            toggleUserInvited,
+            setOpponent,
+            setPlayerFleets,
             setUserStatus,
             startNewGame,
-            setPlayerFleets,
-            opponent,
-            finishBattle,
-            setOpponent,
-            submitPlayerFleets
+            submitPlayerFleets,
+            userStatus,
         }}>
             {children}
         </GameplayContext.Provider>
