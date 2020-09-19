@@ -1,9 +1,10 @@
-server:
-  build: ./server
+game:
+  build: ./
   ports:
     - 8080:8080
-
-client:
-  build: ./client
-  ports:
     - 3000:3000
+  volumes:
+    - ./:/usr/src/
+    - /usr/src/server/node_modules
+    - /usr/src/client/node_modules
+  stdin_open: true
