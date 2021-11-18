@@ -1,5 +1,8 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+![Sea-battle](https://user-images.githubusercontent.com/34154535/142384428-bf13e90e-663f-4248-8dcf-669d3dfc60b4.gif)
+
+
 ## Available Scripts
 
 In the project directory, you can run:
